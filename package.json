@@ -1,14 +1,24 @@
 {
   "name": "corrective-rag-mcp",
   "version": "1.0.0",
-  "description": "",
+  "description": "MCP server for RAG knowledge base with Corrective RAG pipeline",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "npx -y @modelcontextprotocol/inspector tsx src/index.ts",
+    "test": "vitest"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.4.3"
+  },
   "devDependencies": {
-    "typescript": "^5.5.3"
+    "@modelcontextprotocol/inspector": "^0.22.0",
+    "@types/node": "^26.0.0",
+    "tsx": "^4.22.4",
+    "typescript": "^5.5.3",
+    "vitest": "^4.1.9"
   },
   "private": true
 }
