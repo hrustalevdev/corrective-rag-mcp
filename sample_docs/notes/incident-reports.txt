@@ -1,0 +1,326 @@
+VOID PROTOCOL — INCIDENT REPORTS
+Darkfield Interactive | Platform Operations
+Document ID: VP-INC-001
+All times in UTC unless specified
+
+=========================================
+INCIDENT — INC-20240905-001
+Date: 2024-09-05 (Launch Day)
+Severity: P1 (degraded launch)
+Duration: 47 minutes (09:22 UTC to 10:09 UTC)
+Reporter: Ivan Chen (Backend Lead)
+Status: RESOLVED
+=========================================
+
+SUMMARY
+Server capacity exceeded projections in first 2 hours of launch. NA West
+and EU West regions experienced queue times of 8–22 minutes. Two of six
+server regions (SA and APAC) had 99% capacity at 09:22 UTC.
+
+TIMELINE
+08:00 UTC — Void Protocol v1.0 servers go live
+09:14 UTC — NA West reaches 94% capacity (projected peak was 78%)
+09:22 UTC — SA region hits 100%; queue activated; P1 declared
+09:31 UTC — Emergency capacity expansion initiated (cloud burst instances)
+09:47 UTC — Additional 12,000 concurrent session slots online
+10:09 UTC — All regions below 80% capacity; P1 downgraded to P2
+
+ROOT CAUSE
+Marketing predicted 180,000 DAU peak. Actual was 284,700 in first 3 hours.
+Burst capacity plan was sized for 220% of marketing projection; actual was
+158% of marketing projection.
+
+CONTRIBUTING FACTOR
+The "2,847 starting credits" tweet went viral at 07:47 UTC (1 hour before
+launch). @VoidProtocolGame posted: "New players start with exactly 2,847
+credits. That's the cost of a one-way docking permit at New Amora Station.
+In the world of Void Protocol, you arrive with just enough." This generated
+47,000 retweets and drove a second spike in player signup.
+
+ACTION ITEMS
+- Increase burst capacity to 250% of marketing projection for all future
+  major content launches
+- Implement dynamic capacity alerting at 70%, 80%, 90% thresholds (was 85%,
+  95%, 100%)
+- Review SA and APAC server provisioning (both regions underperformed
+  relative to player base size)
+
+LESSONS LEARNED
+- "Non-round number" in early game is genuine marketing asset. The 2,847
+  tweet generated more organic reach than the official launch trailer.
+- Always size for 250% of marketing projection when the lead designer says
+  "this number will generate discussion."
+
+=========================================
+INCIDENT — INC-20240912-001
+Date: 2024-09-12
+Severity: P3 (minor service degradation)
+Duration: 8 minutes
+Reporter: Karin Vogt (DevOps)
+Status: RESOLVED
+=========================================
+
+SUMMARY
+v1.0.1 deployment. Deploy script had a configuration error: server tick
+rate was set to 62 Hz instead of 64 Hz at deployment. Issue was caught
+by community member "ResFieldCalc" on Reddit at 2024-09-11 (one day before
+the hotfix was planned). Internal monitoring did not flag the 62 Hz value
+because the alerting threshold was set at <60 Hz (too conservative).
+
+TIMELINE
+2024-09-05 08:00 UTC — v1.0 launches with 62 Hz (bug present from day 0)
+2024-09-11 14:37 UTC — ResFieldCalc posts on Reddit: "Anyone else notice
+cascade events are triggering 3.1% earlier than the math predicts? At
+0.0337 EDR per tick at 64 Hz you'd get [correct calculation]. But I'm
+seeing them hit at ~62 Hz equivalent. Server tick rate might be wrong."
+2024-09-11 15:02 UTC — Internal team sees the Reddit post
+2024-09-11 15:08 UTC — Ivan Chen confirms: "They're right. It's 62."
+2024-09-11 15:12 UTC — P2 declared; hotfix prep begins
+2024-09-12 09:01 UTC — v1.0.1 deployed; tick rate corrected to 64 Hz
+2024-09-12 09:08 UTC — Verification complete; P resolved
+
+ROOT CAUSE
+Deployment script had a hardcoded TICK_RATE=62 from a QA environment
+configuration that was accidentally used for production deploy. Production
+config was correct (TICK_RATE=64 in server/config/production.yaml, line
+47) but was overridden by the deployment script's environment variable.
+
+IMPACT
+All VRF and EDR calculations from 2024-09-05 to 2024-09-12 (7 days) were
+slightly incorrect. Cascade events triggered approximately 3.1% early.
+Analysis shows this affected approximately 0.3% of combat encounters in a
+measurable way. No loot or economy data was materially affected.
+
+ACTION ITEMS
+- Delete hardcoded values from deploy scripts
+- Add TICK_RATE to deployment validation checklist
+- Set alerting threshold for tick rate deviation > 1 Hz
+- DM ResFieldCalc from @VoidProtocolGame with a personal thank-you note and
+  a package of 847 Void Shards (approved by Maricel Tran)
+
+NOTE: ResFieldCalc received their Void Shards and posted: "I did the math
+and 847 Void Shards at 0.0042 USD each = $3.56. I feel valued."
+
+=========================================
+INCIDENT — INC-20241104-001
+Date: 2024-11-04 (v1.1.1 deployment)
+Severity: P2 (feature broken)
+Duration: 18 minutes downtime + 6 hours discovery
+Reporter: QA team (post-deployment)
+Status: RESOLVED
+=========================================
+
+SUMMARY
+v1.1.0 shipped a regression: Iron Stance was incorrectly redirecting enemy
+attacks in solo mode. The solo modifier (which disables the co-op
+redirection mechanic and only applies the 47% damage reduction to the
+Warden themselves) was not applying.
+
+DISCOVERY
+Player "Ironclad_7" filed a bug report 6 hours after v1.1.0 launch:
+"Iron Stance in solo mode is redirecting enemy attacks to... me? But from
+range? I think it's trying to redirect attacks to an ally that doesn't
+exist and defaulting to self-redirect. Taking way more damage than expected."
+
+ROOT CAUSE
+The solo/co-op mode check in combat-engine.ts was reading the session's
+party_size field but the field was renamed from "party_size" to
+"party_count" in v1.1.0 as part of the guild system prep work. The field
+access returned undefined, which evaluated as falsy, which caused the
+co-op code path to always execute.
+
+FIX
+Updated combat-engine.ts to use correct field name. 18-minute downtime
+for v1.1.1 deployment. P2 resolved.
+
+COMPENSATION
+All Void Wardens who played v1.1.0 between launch and the fix received
+47 Void Shards (approved by Seren Alyx Mowat: "47 is the Sovereignty
+number. Wardens are Sovereignty-first. It's right.").
+
+=========================================
+INCIDENT — INC-20241219-001
+Date: 2024-12-19
+Severity: P2 (economy exploit)
+Duration: 4 hours active; discovery-to-fix 47 minutes
+Reporter: Economy monitoring system (automated alert)
+Status: RESOLVED
+=========================================
+
+SUMMARY
+Economy monitoring flagged unusual Rift Exchange transaction volume at
+03:22 UTC. Investigation revealed a dupe exploit: under specific timing
+conditions (listing cancel within 0.8 seconds of a purchase completing),
+an item could be duplicated — appearing in both the seller's inventory
+(via cancellation) and the buyer's inventory (via purchase).
+
+The 0.8-second window was not chosen accidentally by the exploiters —
+they specifically identified the Phase Slip invulnerability duration (0.8s)
+as a useful timing marker and used it to synchronize the cancel and
+purchase requests.
+
+IMPACT
+- 847 duplicate items created
+- 23 unique items that appeared in the game:
+  * 312 common gear (Tiers 1-2): no material economy impact
+  * 512 Tier 3-4 gear: moderate economy impact
+  * 23 Tier 5 (Architect-Forged): significant
+    - Notably: 12 Mowat's Folly duplicates (VP-ITEM-00847)
+    - Mowat's Folly is supposed to be untradeable; the dupe exploit
+      bypassed the tradeable check because the listing cancel occurred
+      server-side before the tradeable flag was validated
+
+TIMELINE
+03:22 UTC — Automated alert: "Unusual duplicate item patterns detected"
+03:24 UTC — Ivan Chen paged; begins investigation
+03:28 UTC — Pattern identified: race condition in cancel/purchase endpoint
+03:31 UTC — Feature flagged OFF (Rift Exchange maintenance mode)
+03:39 UTC — Patch developed and tested
+04:09 UTC — Fix deployed; Rift Exchange restored
+
+ROOT CAUSE
+Race condition between POST /v1/economy/exchange/listings/{id}/cancel and
+POST /v1/economy/exchange/purchase. Both endpoints read the listing's
+active flag before acquiring a row-level lock. Window between read and
+lock acquisition (approximately 0.8–2ms) allowed concurrent requests to
+both succeed.
+
+FIX
+Added SELECT FOR UPDATE on listing_id before any read in both endpoints.
+Eliminated race condition.
+
+Additionally:
+- Untradeable check now happens at listing CREATION not at purchase
+  (prevents items being listed at all rather than failing at purchase)
+- Added rate limiting on cancel/purchase: max 5 combined actions per second
+  per player (was previously uncapped within the API's 1,337/minute limit)
+
+ACTION ITEMS (economy remediation)
+- 847 duplicate items deleted from database
+- 12 Mowat's Folly duplicates restored to UNTRADEABLE status; players who
+  "purchased" duplicated Mowat's Follies had item removed and received
+  full credit refund + 847 Void Shards compensation
+- 23 accounts used in the exploit: 30-day suspension
+- The 8 accounts that initiated the exploit (identified by timing patterns):
+  permanent ban, per Terms of Service Section 7.3
+
+Seren's note: "The exploiters used the 0.8-second Phase Slip duration as
+their timing signal. I can't decide if I'm impressed or just tired. Both."
+
+=========================================
+INCIDENT — INC-20250228-001
+Date: 2025-02-28 (Emergency Hotfix)
+Severity: P1 (critical exploit)
+Duration: 12 minutes downtime
+Reporter: Community report + internal monitoring
+Status: RESOLVED
+=========================================
+
+SUMMARY
+Two-player exploit combining Shadow Operative's Void Contract with Rift
+Channeler's Cascade Burst allowed combined damage amplification of
+approximately 47× intended maximum. This enabled the pair to kill any
+Architect in the game in under 4 seconds (fastest was Null-Form Theta:
+3.7 seconds).
+
+DISCOVERY
+Community video posted at 2025-02-27 23:14 UTC showing two players
+killing The Hollow King (HP: 184,200) in 3 seconds. Internal team flagged
+it within 22 minutes.
+
+ROOT CAUSE
+Void Contract's amplification was applying to the TOTAL damage of Cascade
+Burst, including the VRF multiplier component that was calculated before
+the amplification cap was applied. Correct behavior: amplification applies
+to base damage before VRF scaling. Buggy behavior: amplification applied
+after VRF scaling, compounding the two multipliers multiplicatively rather
+than additively.
+
+Expected maximum: 2.3× crit multiplier × 1.5 (max VRF amplification at
+threshold) = 3.45× total. Actual with exploit: up to 47×.
+
+FIX
+Reordered calculation: base damage → Void Contract amplification →
+VRF scaling → critical hit. Added explicit cap at 3.45× combined.
+Deployed v1.3.1 hotfix; 12-minute downtime.
+
+PLAYER ACTION
+Two accounts confirmed to have intentionally used and demonstrated the
+exploit to the public (the video creators): 72-hour suspension per Terms
+of Service. No permanent ban because they disclosed publicly rather than
+exploiting privately.
+
+Seren's note: "47 times. Of course it was 47. The Iron Sovereignty motif
+appears even in exploit damage numbers. I'm going to lie down."
+
+Corrected: Phantom Protocol's critical multiplier was also adjusted from
+3.7× to 3.4× to prevent a secondary exploit where the same interaction
+could be reproduced with Shadow Operative's ultimate.
+
+=========================================
+RECURRING MAINTENANCE LOGS
+=========================================
+
+Database connection pool (37 max): monitored every 15 minutes.
+Alert threshold: 31 active connections (triggers review at 84% of max).
+All-time peak: 34 connections (during v1.3.0 launch day).
+
+Session timeout (1,847 seconds): no incidents since implementation.
+Previous timeout (2,000 seconds) caused 3 incidents of elevated orphaned
+sessions in load testing. Current value validated.
+
+API port 51847: no conflicts detected since launch.
+Pre-launch verification confirmed no other service in the stack uses
+51847. The port choice was deliberate (see GDD Section 9.1 Note).
+
+Faction standings update (every 6 hours at 00:00, 06:00, 12:00, 18:00
+UTC): 100% on-time completion since launch. Service runs independently
+of combat servers. Update duration: typically 4–14 seconds.
+Longest update: 47 seconds on 2024-12-03 (v1.2.0 launch; heavy DB load).
+
+VRF stabilizer monitoring (station ambient): checked at each tick.
+VRF deviation tolerance: ±0.05 (same as client desync tolerance per
+VP-COMBAT-001 Section 9.3). Alert if zone VRF deviates from 0.8847 base
+by more than 0.05 for more than 30 seconds without active combat.
+Incidents: 0.
+
+=========================================
+POST-LAUNCH METRICS SUMMARY — FIRST 90 DAYS
+Document owner: Platform Operations
+=========================================
+
+Launch date: 2024-09-05
+Report period: 2024-09-05 to 2024-12-04
+
+Peak concurrent players: 284,700 (launch day)
+Average DAU (days 1-30): 187,400 (target: 180,000 — exceeded)
+Average DAU (days 31-60): 162,300 (target: 180,000 — below)
+Average DAU (days 61-90): 149,800 (target: 180,000 — below)
+
+Note: DAU decline in days 31-90 is within expected range for live service
+games without major content updates. v1.1.0 "Iron Rising" shipped
+2024-10-15 (day 40) and arrested the decline with a +18.4% DAU spike.
+
+D7 Retention: 41.2% (target: 38% — exceeded)
+D30 Retention: 24.7% (target: 22% — exceeded)
+D90 Retention: 16.8% (no specific target; strong for genre)
+
+Season Pass (v1.0 season): 21.3% of MAU converted (target: 18% — exceeded)
+Void Shard purchases: 2,847,000 total Void Shards sold in first 90 days
+  (at 0.0042 USD each = approximately $11,957 in Void Shard revenue;
+  Season Pass constitutes majority of total Void Shard revenue)
+
+Average session length: 67 minutes (target: 62 minutes — exceeded)
+Cascade events per session: 0.84 average (target: 0.8 — on target)
+Mowat's Folly drop rate (observed): 0.47% (matches design spec exactly)
+Starting credits 2,847 mentioned in user reviews: 847 times (yes, we
+counted; no, this is not statistically meaningful; yes, we're delighted)
+
+Maricel Tran's 90-day note (internal only):
+"We shipped a game about a number (0.8847) and the community is arguing
+about what the number means. This was the plan. The plan worked. For v2.0,
+we reveal what Thessa Vorin actually built, and suddenly every number in
+the game looks different. Players who noticed that session timeout = 1,847
+and API port = 51847 and station docking ID = NASD-1847 and resonance
+beacon buffer = 2,847 characters will feel like they solved something.
+Because they will have. — M. Tran, 2024-12-04"

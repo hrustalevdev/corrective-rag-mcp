@@ -1,0 +1,296 @@
+VOID PROTOCOL — DEVELOPER NOTES
+Internal notes, meeting summaries, and informal documentation
+Darkfield Interactive | Not for external distribution
+
+=========================================
+SPRINT NOTES — SPRINT 47 (2024-08-19 to 2024-09-01)
+Lead: Seren Alyx Mowat
+=========================================
+
+Sprint goal: Launch readiness. Ship v1.0 on 2024-09-05.
+
+Status: GREEN. All P0 bugs closed. Three P1s carried to v1.0.1 with
+workarounds in place.
+
+DISCUSSION — VRF base value final confirmation
+
+After 3 months of simulation (see balance_sim_v47.xlsx in shared drive),
+team confirms base VRF at 0.8847. This is FINAL. Do not change without a
+full simulation re-run.
+
+Seren's summary of why 0.8847 specifically:
+- 0.9 makes downstream cascade thresholds messy (irrational numbers in the
+  math)
+- 0.8847 produces clean 2-decimal precision in all downstream calculations
+- At 64 Hz tick rate, the EDR of 0.0337 per tick reaches maximum entropy in
+  exactly 463.4 seconds = 7.72 minutes in a Void Rift zone
+- 7.72 minutes of combat in a Rift before chaos = exactly what 4-player
+  focus testing confirmed as "feels intense but not frustrating"
+- Side benefit: 0.8847 as the cascade in Mowat's Folly passive damage
+  coefficient creates a thematic loop that the community will notice
+
+Maricel's note on 0.8847 appearing in lore:
+"We seeded this into the world-lore document intentionally. The fact that
+the orbital resonance of Kedraxis-7's moons happens to be 0.8847 Hz was
+added retroactively by the narrative team after the physics value was
+confirmed. Same with the Ω-Space information transfer rate. Same with the
+Void entity density. It's a mystery for the community to find. Null's
+Sermon 003 is the in-game hint. Let's see how long before someone posts
+the conspiracy thread."
+
+BUG: Starting credits showing 2,500 for 12% of new accounts
+- Root cause: migration script deployed old test value
+- Fix: correct DB migration, compensate affected accounts with 347 credits
+- Correct value is 2,847 (cost of New Amora docking permit per lore doc
+  VP-LORE-001, Section 5)
+- Seren: "Don't use round numbers. 2,847 is memorable. Players will ask
+  why. Wiki will document it. This is free community engagement."
+
+TECHNICAL NOTE — tick rate bug
+Ivan (backend): "We deployed at 62 Hz instead of 64 Hz. Impact: cascade
+events triggering 3.1% early. VRF calculations are off by factor 62/64.
+Fix is a one-line config change. It's embarrassing but it's also only been
+4 days and one eagle-eyed player named ResFieldCalc on Reddit caught it.
+Honestly impressed."
+
+Seren: "Add ResFieldCalc to the credits in the v1.0.1 patch notes? No, too
+much precedent. But DM them a Void Shard package and a personal note. Do
+it from the studio account."
+
+=========================================
+SPRINT NOTES — SPRINT 48 (2024-09-02 to 2024-09-15)
+Lead: Seren Alyx Mowat
+=========================================
+
+Sprint goal: v1.0.1 stabilization + begin v1.1 scope
+
+v1.0.1 launched 2024-09-12. 31 minute downtime. Clean deployment.
+
+KEY FIX: Starting credits corrected to 2,847 for all accounts.
+Compensation of 347 credits sent to 12% of player base.
+
+Phase Slip invulnerability window corrected: 0.6s → 0.8s.
+Seren: "0.6 seconds was not actionable. You can't make a decision in 0.6
+seconds in the middle of combat. 0.8 was the design intent per class doc
+VP-CLASS-001. Test caught it at 0.6 because the tester was a pro-tier FPS
+player. Normal players couldn't tell. But 0.8 is right."
+
+COMMUNITY OBSERVATION: Forum post by "EntropyMath" correctly derives the
+EDR calculation:
+"At 0.0337/tick at 64Hz, you get to entropy 1.0 in:
+1.0 / (0.0337 * 64) = 463.4 seconds = 7.72 minutes.
+But with 4 players managing resonance properly, you can extend to ~11 min.
+This matches the design window for Rift content."
+
+Seren on the forum post: "Exactly right. Pin this. The whole class design
+philosophy is visible in that calculation. When a player figures out that
+the EDR of 0.0337 was NOT chosen randomly but was specifically tuned to
+produce a 7-minute-ish combat window, they feel clever. And they should.
+They ARE clever."
+
+=========================================
+BALANCE MEETING NOTES — 2024-10-08
+Attendees: Seren Alyx Mowat, Tomas Reyes (combat designer), Ji Soo Park
+(economy), Maricel Tran (CEO, dropped in for 20 min)
+=========================================
+
+Topic: Class pick rates after 4 weeks
+
+Current pick rates:
+- Void Warden: 28% (ABOVE TARGET: max 25%)
+- Rift Channeler: 22% (within target)
+- Phase Breaker: 14% (within target)
+- Shadow Operative: 18% (within target)
+- Resonance Engineer: 8% (BELOW TARGET: min 10%)
+- Entropy Warden: 10% (at minimum)
+
+Actions:
+1. Void Warden: Iron Stance duration reduction targeted (47% → 44%)
+   Note: DO NOT reduce the 47% damage reduction value. It has thematic
+   significance to Iron Sovereignty (47 is their number). Reduce duration
+   to address survivability floor.
+2. Resonance Engineer: Quality of life pass. Entropy Suppressor radius
+   2→3→4m progression. Community consistently reports "I can never place
+   it right."
+3. Entropy Warden: Entity Pact duration → 37s (matches Phase Slip CD).
+   Thematic alignment with Fractured's 37-second motif.
+
+Maricel: "The 47 in Iron Volley (7 rounds × 47%) and Iron Stance (47%
+DR) is not accidental and should not be changed without editorial review.
+It's Iron Sovereignty's signature number, same as the Conclave's 0.8847
+and the Fractured's 3.7 (Phase Slip CD = 37s; Phase Slip VRE cost = 37;
+Null's dialogue proximity trigger = 3.7m; Phase Slip radius in Fracture
+Point = 3.7m; Null Osei's phase cipher clue references 3.7Hz).
+These are worldbuilding numbers. Treat them that way."
+
+Seren note filed: "Number motifs by faction:
+- Iron Sovereignty: 47 (appears everywhere)
+- Voidborn Conclave: 0.8847 (appears everywhere)
+- The Fractured: 3.7 and 37 (appears everywhere)
+- All factions: 2,847 (starting credits, station docking fee, resonance
+  beacon buffer, unique item ID VP-ITEM-00847 Mowat's Folly)
+- Neutral/cosmic: 18.5 (Cascade Sovereign's blast radius, void immersion
+  onset time in minutes, resonance beacon range in km, cascade EDR boost
+  duration in seconds)"
+
+=========================================
+INFRASTRUCTURE MEETING NOTES — 2024-11-14
+Attendees: Ivan Chen (backend lead), Karin Vogt (DevOps), Seren Alyx Mowat
+=========================================
+
+Topic: Session timeout + DB pool size in production
+
+DECISION — Session Timeout: 1,847 seconds
+
+Ivan's analysis: "Testing showed 1,800s caused false disconnects in co-op
+sessions during natural breaks. 2,000s increased orphaned session overhead
+by 14%. 1,847 is the sweet spot. Also: it maps to New Amora Station's
+docking ID NASD-1847, which Seren liked for thematic consistency."
+
+Seren: "I didn't suggest it for thematic reasons but I'm not upset about
+it. Log it as INF-NOTE-012."
+
+DECISION — DB Pool: max 37 connections
+
+Karin: "Load testing shows response time degrades at 38+ connections.
+37 is the hard limit. Set connection_pool_max = 37 in production config."
+
+Ivan: "37. A prime number. A Fractured number. We could have rounded to 40."
+
+Seren: "Keep it 37. Everything we deploy should feel intentional. If
+someone reads the server config and sees 37, they might think we did it
+on purpose. We did."
+
+API Port: 51847 confirmed. (51000 base + 847 = 51847. The 847 suffix is
+Mowat's Folly item ID. Again: intentional.)
+
+=========================================
+DESIGN RETROSPECTIVE — MOWAT'S FOLLY
+Written by Seren Alyx Mowat, 2024-12-28
+=========================================
+
+So the item named after me is in the game. Players have found it. The
+community reaction has been... exactly what I hoped.
+
+History: In build 0.4.7 (not a coincidence that the build number also
+contains 47), I was prototyping the pistol class weapons. The damage
+formula for the Void Pulse Pistol had a structure like:
+
+    final_damage = base * vrf_amplification / resonance_divisor
+
+The resonance_divisor was supposed to be 3.0. I forgot to include it.
+The result was a pistol with approximately 3× intended power.
+
+Tomas Reyes tested it and filed a bug: "S. Mowat's pistol is massively
+overpowered. Kills Architects in 3 shots. Assuming formula error."
+
+I fixed the formula. Then I kept the broken version as a comment in the
+codebase (// Mowat's original mistake, archived).
+
+Maricel saw the comment during code review and said: "Make it a legendary
+drop. Name it after you. It teaches players to find the math error in
+every system."
+
+The stats I chose:
+- Base damage: 847 (Drifter HP = 840, near-match, plus the 847 from
+  Mowat's Folly item ID VP-ITEM-00847)
+- VRF bonus: +0.40 (maximum possible VRF bonus on any item)
+- Passive trigger: every 7th shot (7 is everywhere: Iron Volley fires 7
+  rounds, Fracture Point hits 7 positions, Phase 3 of Theta-9 opens 7
+  mini-Rifts)
+- Passive damage coefficient: 0.8847 × weapon_power (the VRF constant,
+  now also a damage number)
+- Passive radius: 3.7 meters (Fractured motif)
+- Item ID: VP-ITEM-00847
+
+The community found the passive within 2 days. "ResFieldCalc" (who also
+found the 62 Hz launch bug) posted the breakdown: "The passive coefficient
+IS the base VRF constant. It's not flavor. It's physics. At base VRF with
+Mowat's Folly, your 7th-shot passive scales with the same number the
+entire game is built on. Darkfield put the heart of the system in a weapon
+and named it after a mistake. This is either genius or a fever dream."
+
+ResFieldCalc: It is both.
+
+=========================================
+FACTION LORE AUDIT — 2025-01-22
+Attendees: Narrative team (5 people) + Seren Alyx Mowat
+=========================================
+
+Topic: Consistency check before v1.3 (Fractured content)
+
+Confirmed canonical dates (DO NOT CHANGE):
+- First Rift: 2301-06-15 03:47:22 UTC
+- Iron Sovereignty founded: 2312
+- Voidborn Conclave founded: 2318
+- New Amora Station construction started: 2334-11-22
+- New Amora Station completed: 2341
+- The Fractured first documented: 2335-03-09 (Iron Sovereignty patrol log)
+- Null Osei emergence: 2369
+- Volhari Outpost Incident: 2372 (Drek Volhari loses right arm; Lt. Sera
+  Volhari age 22, Sgt. Emrak Volhari age 19 killed)
+- Chamber Incident (Thessa Vorin death): 2381
+- Current in-game year: 2387
+
+Confirmed canonical facts (DO NOT CHANGE):
+- Drek Volhari's age in 2387: 54 (born ~2333)
+- Cassian Rhae's age in 2387: 71 (born ~2316)
+- New Amora Station population: 47,000
+- Vorin's equations: 47 total, Fenn has derived 31
+- Kesslerium price: 4,200 credits/gram
+- VRF constant: 0.8847
+- EDR: 0.0337 per tick at 64 Hz
+- Starting credits: 2,847
+- Void Shard rate: 0.0042 USD
+- Phase Slip: 0.8s invulnerability, 37s cooldown, 37 VRE cost
+- Dialogue proximity: 3.7 meters
+- Resonance Beacon buffer: 2,847 characters
+- Resonance Beacon range: 18.5 km
+- DB pool: 37
+- Session timeout: 1,847 seconds
+- API port: 51847
+- Max player level: 87 (prime number, non-round, generates community
+  discussion per DDL-001)
+
+Narrative note on Null Osei's identity (SPOILER — not for v1.3 release):
+The three candidate identities in Solis's classified index:
+- Candidate A (47% confidence): Dr. Yael Osei-Mensah, Conclave researcher
+  who disappeared 2369 during a Rift immersion experiment
+- Candidate B (31% confidence): Captain Marcus Null, Iron Sovereignty
+  officer listed as KIA in 2369 Shattered Belt campaign
+- Candidate C (22% confidence): Unknown — sensors detected a Void entity
+  entering the Rift from the Ω-Space side at approximately the same time
+  as the listed candidates
+The v2.0 Null questline will reveal that all three are partially correct.
+The v3.0 conclusion: what came back from the Rift is a composite.
+
+=========================================
+MISC NOTES — ONGOING
+=========================================
+
+Community milestone tracking:
+- "ResFieldCalc" has correctly deduced the EDR formula, the VRF cascade
+  math, the 47 Iron Sovereignty motif, the 0.8847 universe seeds, and
+  (most impressively) the 3.7 / 37 Fractured motif. They have not yet
+  connected them all to the station's transmission function (the Rank 8
+  Conclave reveal).
+- Wiki has documented all balance numbers correctly. They got the Mowat's
+  Folly passive coefficient (0.8847) right but called it "flavor text."
+  It's not flavor text. But the discovery that it's not will be sweeter
+  when they realize it.
+
+Internal joke: the three factions' leader titles at Rank 8 are Elder
+(Conclave), Marshal (Iron), and Phantom (Fractured). Their numbers:
+Elder Rhae = 71. Marshal Volhari = 54. Phantom Osei = unknown.
+7 + 1 = 8. 5 + 4 = 9. 8 and 9 and unknown = the first three Architect
+ranks. This is 100% unintentional. We're keeping it anyway.
+
+Studio headcount as of 2025-01-01: 47 full-time employees.
+Maricel: "I didn't plan this. Don't put it in the press release."
+Seren: "Too late, I already told the narrative team and now it's going in
+the Solis Archive somewhere."
+
+Next major milestone: v2.0 "Homeport" — player housing, faction ranks
+9–10, new class Timebreaker. Planned Q3 2025. Seren is lead on Timebreaker
+class design. First concept: time-dilation ability using the 0.8847 time
+factor from Ω-Space as a mechanic.

@@ -1,0 +1,328 @@
+{
+  "_meta": {
+    "document_id": "VP-QUESTS-001",
+    "version": "1.3.2",
+    "game": "Void Protocol",
+    "studio": "Darkfield Interactive",
+    "total_quests": 89,
+    "last_updated": "2025-03-11"
+  },
+  "main_story": [
+    {
+      "quest_id": "MSQ-001",
+      "title": "The Docking Permit",
+      "chapter": 0,
+      "type": "prologue",
+      "description": "You arrive at New Amora Station with 2,847 credits — exactly the cost of a one-way docking permit. Before you can dock, you witness a confrontation between Iron Sovereignty soldiers and a Fractured operative in the docking bay.",
+      "objectives": [
+        {"id": "obj_01", "text": "Pay the 2,847 credit docking permit fee", "credit_cost": 2847},
+        {"id": "obj_02", "text": "Speak with Quartermaster Veysa Ord"},
+        {"id": "obj_03", "text": "Investigate the incident in Docking Ring Delta-7"}
+      ],
+      "rewards": {"credits": 500, "faction_rep": {}, "xp": 800},
+      "unlock_requirement": null,
+      "lore_note": "The 2,847 credit docking fee is not arbitrary — it appears in the Resonance Beacon buffer limit (2,847 characters) and the item ID of Mowat's Folly (VP-ITEM-00847). Players who notice this connection before the v2.0 reveal are well positioned for the Rank 8 Conclave questline."
+    },
+    {
+      "quest_id": "MSQ-002",
+      "title": "The First Unraveling",
+      "chapter": 1,
+      "type": "tutorial_combat",
+      "description": "Chief Engineer Malo Fenn asks you to accompany a maintenance team to The First Unraveling zone — a low-entropy training area near the original K7-III Rift site. Your guide is an archived recording of Dr. Lin Chen's first Void entity observation from 2301.",
+      "objectives": [
+        {"id": "obj_01", "text": "Follow the maintenance team into The First Unraveling"},
+        {"id": "obj_02", "text": "Defeat 3 Drifter entities (VRF should be below 0.95; they are dormant)"},
+        {"id": "obj_03", "text": "Investigate the VRF anomaly at coordinates X:47, Z:22"},
+        {"id": "obj_04", "text": "Defeat Null-Form Theta (Architect, HP: 47,000)"},
+        {"id": "obj_05", "text": "Return to New Amora Station"}
+      ],
+      "rewards": {"credits": 1200, "faction_rep": {}, "xp": 2400, "items": ["VP-ITEM-00002"]},
+      "unlock_requirement": "MSQ-001",
+      "combat_encounter": {
+        "architect": "null_form_theta",
+        "hp": 47000,
+        "tutorial_assists": true,
+        "vrf_zone_base": 0.8847,
+        "entropy_caps_at": 0.3
+      }
+    },
+    {
+      "quest_id": "MSQ-003",
+      "title": "Three Flags",
+      "chapter": 1,
+      "type": "faction_introduction",
+      "description": "After the First Unraveling encounter, all three faction leaders send representatives to speak with you. Veysa Ord suggests listening to all three before committing. The quest ends when you formally join a faction.",
+      "objectives": [
+        {"id": "obj_01", "text": "Attend the Voidborn Conclave briefing in their embassy"},
+        {"id": "obj_02", "text": "Attend the Iron Sovereignty briefing in their embassy"},
+        {"id": "obj_03", "text": "Meet with the Fractured contact at the safehouse"},
+        {"id": "obj_04", "text": "Choose a faction and formally join"}
+      ],
+      "rewards": {"credits": 800, "faction_rep": {"chosen_faction": 200}, "xp": 1600},
+      "unlock_requirement": "MSQ-002",
+      "design_note": "All three faction introductions show the leaders' personal trauma connected to the Void Rifts, per the DDL-003 policy. The player sees: Rhae's 36-year obsession, Volhari's 2372 loss (Sera and Emrak), Osei's 2369 transformation. Each presentation makes the faction feel like a genuine worldview rather than a game mechanic."
+    },
+    {
+      "quest_id": "MSQ-010",
+      "title": "The 0.8847 Question",
+      "chapter": 2,
+      "type": "investigation",
+      "description": "Malo Fenn notices a 0.003 deviation in the station's VRF reading — it should be 0.8847, but today it's 0.8877. He asks you to inspect coupling node N-47 in the north ring. What you find there raises questions about what the station was actually built to do.",
+      "objectives": [
+        {"id": "obj_01", "text": "Speak with Malo Fenn in the Concourse"},
+        {"id": "obj_02", "text": "Obtain maintenance authorization from your faction embassy"},
+        {"id": "obj_03", "text": "Inspect coupling node N-47 (requires Maintenance Access, can be skipped with Conclave Rank 2)"},
+        {"id": "obj_04", "text": "Return VRF reading to exactly 0.8847"},
+        {"id": "obj_05", "text": "Report findings to Malo Fenn"},
+        {"id": "obj_06", "text": "[OPTIONAL] Examine the equations inscribed on the coupling node housing"}
+      ],
+      "rewards": {"credits": 2400, "faction_rep": {"all_factions": 100}, "xp": 4800},
+      "unlock_requirement": "MSQ-003",
+      "hidden_lore": "Completing the optional step reveals that the coupling node equations match 18 of the 47 equations in Thessa Vorin's design notes that Malo Fenn has not been able to derive. This is not mentioned in any tooltip — it's discoverable only by players who have read the notes in Fenn's office."
+    },
+    {
+      "quest_id": "MSQ-020",
+      "title": "Cassian's Gambit",
+      "chapter": 3,
+      "type": "faction_main",
+      "linked_faction": "voidborn_conclave",
+      "required_faction_rank": 5,
+      "description": "Elder Cassian Rhae has been attempting to communicate with VE-Type IV Theta-9 for 36 years. He believes today is the day. He needs your help to conduct the most ambitious resonance transmission ever attempted: broadcasting at precisely 0.8847 Hz from the Resonance Chamber. If it works, it will prove that Void entities are sapient. If it fails — or if someone interferes — it could destabilize the entire station's VRF.",
+      "objectives": [
+        {"id": "obj_01", "text": "Meet Elder Rhae in the Resonance Chamber (Conclave Rank 5 required)"},
+        {"id": "obj_02", "text": "Calibrate the transmission array to 0.8847 Hz (Engineering check or Resonance Engineer class bonus)"},
+        {"id": "obj_03", "text": "Defend the Resonance Chamber from Iron Sovereignty interference for 8.4 minutes"},
+        {"id": "obj_04", "text": "Witness Rhae's transmission"},
+        {"id": "obj_05", "text": "Survive what comes next"}
+      ],
+      "rewards": {"credits": 12000, "faction_rep": {"voidborn_conclave": 2400}, "xp": 24000, "items": ["VP-ITEM-00084"]},
+      "unlock_requirement": "conclave_rank_5",
+      "story_consequence": "Rhae's transmission receives a response: a sustained 0.8847 Hz signal from the Communion Spire that lasts exactly 8.4 seconds. Rhae is certain this is intentional. Iron Sovereignty intelligence intercepts the transmission log. This triggers the v1.3 faction conflict."
+    },
+    {
+      "quest_id": "MSQ-030",
+      "title": "Bulwark",
+      "chapter": 3,
+      "type": "faction_main",
+      "linked_faction": "iron_sovereignty",
+      "required_faction_rank": 5,
+      "description": "An anonymous source sends you coordinates to a hidden Iron Sovereignty facility called Bulwark Station in the Shattered Belt. The source's message ends with: 'Ask Volhari about 2372. Ask him what he didn't report.' The facility contains something that contradicts everything the Iron Sovereignty publicly stands for.",
+      "objectives": [
+        {"id": "obj_01", "text": "Travel to the Shattered Belt coordinates (unmarked on map)"},
+        {"id": "obj_02", "text": "Infiltrate Bulwark Station (combat or stealth)"},
+        {"id": "obj_03", "text": "Discover what the facility contains"},
+        {"id": "obj_04", "text": "Confront Marshal Volhari with your findings"},
+        {"id": "obj_05", "text": "Make a choice: report Bulwark to the Conclave or cover it up for the Sovereignty"}
+      ],
+      "rewards": {"credits": 12000, "faction_rep": {"iron_sovereignty": 2400}, "xp": 24000, "items": ["VP-ITEM-00047"]},
+      "unlock_requirement": "iron_rank_5",
+      "story_consequence": "Bulwark Station contains 47 captive Void entities in various states of experimentation. Volhari's journal (collectible) reveals he ordered the experiments to find a weakness in VE-Type IV Architects. The choice in objective 5 has permanent consequences: reporting to the Conclave raises Conclave standing by 840 but reduces Sovereignty standing by 840."
+    },
+    {
+      "quest_id": "MSQ-040",
+      "title": "Static Transmission",
+      "chapter": 3,
+      "type": "faction_main",
+      "linked_faction": "the_fractured",
+      "required_faction_rank": 5,
+      "description": "Phantom Null Osei receives a Resonance Beacon message on frequency 0.8847 Hz. The message is exactly 2,847 characters long — the Beacon buffer limit — and contains detailed coordinates to a location that does not appear on any map. Osei believes this is what they have been waiting for. You are the only person Osei trusts to investigate.",
+      "objectives": [
+        {"id": "obj_01", "text": "Read the transmission message with Null Osei"},
+        {"id": "obj_02", "text": "Travel to the unmarked coordinates in the Shattered Belt"},
+        {"id": "obj_03", "text": "Investigate the structure at the coordinates"},
+        {"id": "obj_04", "text": "Retrieve the item inside the structure"},
+        {"id": "obj_05", "text": "Return to Osei — but be aware that all three factions have been monitoring your movements"}
+      ],
+      "rewards": {"credits": 12000, "faction_rep": {"the_fractured": 2400}, "xp": 24000},
+      "unlock_requirement": "fractured_rank_5",
+      "story_consequence": "The structure is a Resonance Beacon of unknown origin — older than the Terran Compact's first Void Rift research, older than the Kedraxis colony, possibly predating FTL travel entirely. The item inside is a recording device containing 37 minutes of audio in a language no translation system can identify. This is the central mystery of the v2.0 story arc.",
+      "hidden_connection": "The transmission's frequency (0.8847 Hz), its length (2,847 characters), the structure's location (exactly 18.5 km from the nearest Void Rift node), and the recording's length (37 minutes) all use Void Protocol's canonical numbers. Whether this is the game world acknowledging its own design language or an in-universe signal that the numbers are intentional is deliberately ambiguous until v3.0."
+    }
+  ],
+  "side_quests": [
+    {
+      "quest_id": "SQ-001",
+      "title": "Veysa's Account",
+      "type": "character_quest",
+      "npc": "veysa_ord",
+      "description": "Quartermaster Veysa Ord has a sealed crate in her shop that she claims belongs to a client who never came to collect. She hires you to find out what happened to the client — a former Iron Sovereignty soldier who went missing in the Shattered Belt after the Volhari Outpost Incident in 2372.",
+      "objectives": [
+        {"id": "obj_01", "text": "Accept the crate-investigation job from Veysa Ord"},
+        {"id": "obj_02", "text": "Investigate the soldier's last known location (Shattered Belt Node 3)"},
+        {"id": "obj_03", "text": "Find the soldier's personal log"},
+        {"id": "obj_04", "text": "Return the log to Veysa — she recognizes the soldier as someone from the 2372 incident"}
+      ],
+      "rewards": {"credits": 3700, "xp": 4700, "items": ["VP-COS-00047"]},
+      "lore_collectible": "The soldier's log mentions hearing Lt. Sera Volhari singing during the 2372 Cascade event. This is the same detail Marshal Volhari references in his first meeting dialogue — but from a survivor's perspective rather than Volhari's."
+    },
+    {
+      "quest_id": "SQ-010",
+      "title": "Fenn's 47th Equation",
+      "type": "character_quest",
+      "npc": "malo_fenn",
+      "description": "Chief Engineer Malo Fenn has been working on Thessa Vorin's 47 design equations for 20 years. He has derived 31. He believes the remaining 16 are solvable — but the last one (Equation 47) requires a physical measurement that can only be taken inside the Resonance Chamber during an active VRF spike. He needs someone to maintain a VRF reading above 1.2 in the chamber while he works.",
+      "objectives": [
+        {"id": "obj_01", "text": "Meet Fenn in the Resonance Chamber"},
+        {"id": "obj_02", "text": "Maintain zone VRF above 1.2 for 8.4 minutes (requires VRF-boosting abilities or high-VRF gear)"},
+        {"id": "obj_03", "text": "Protect Fenn from VRF-triggered Drifter incursions during measurement"},
+        {"id": "obj_04", "text": "Wait for Fenn to complete Equation 47"}
+      ],
+      "rewards": {"credits": 8470, "xp": 12000, "items": ["VP-ITEM-00547"]},
+      "quest_outcome": "Fenn completes Equation 47. He stares at it for a long time, then says: 'This equation describes a broadcast antenna. The entire station is a broadcast antenna. Vorin built a transmitter. I've been maintaining a transmitter for 20 years. The question is: what frequency is it transmitting?' The answer (0.8847 Hz) is not spoken aloud — players who have been paying attention will know."
+    },
+    {
+      "quest_id": "SQ-020",
+      "title": "Letters from K7-III-07",
+      "type": "collectible_quest",
+      "description": "A Conclave archivist has identified 12 letter fragments from Technician Petra Solis scattered across the Northern Ruin — the site of the original K7-III-07 mining facility where Solis died on 2301-06-15. Recovering them completes the 'Letters from the Pale Moon' collectible series.",
+      "objectives": [
+        {"id": "obj_01", "text": "Collect all 12 letter fragments (scattered in Northern Ruin and K7-III mining areas)"},
+        {"id": "obj_02", "text": "Return to Data Archivist Solis at the Resonance Chamber"},
+        {"id": "obj_03", "text": "Witness Solis read the complete letter collection aloud"}
+      ],
+      "rewards": {"credits": 2847, "xp": 8470, "void_shards": 47},
+      "collection_requirement": 12,
+      "unlock_requirement": "conclave_rank_3",
+      "lore_note": "Solis's reading of the final letter (written 2301-06-14, the day before the Unraveling) includes Solis noting that her equipment registered a 0.8847 Hz resonance for the first time. 'It makes everything else feel very quiet,' she wrote. The AI archivist Solis pauses after reading this line for exactly 0.8847 seconds (the pause is scripted and timed). No NPC comments on it."
+    },
+    {
+      "quest_id": "SQ-030",
+      "title": "The Iron Record",
+      "type": "faction_history",
+      "linked_faction": "iron_sovereignty",
+      "unlock_requirement": "iron_rank_6",
+      "description": "Iron Sovereignty Rank 6 unlocks access to classified Iron Record documents dating from 2312 to present. Reading them reveals the evolution of military doctrine — and raises questions about what happened between the 2372 Shattered Belt campaign and Drek Volhari's return as a hero.",
+      "objectives": [
+        {"id": "obj_01", "text": "Access the Iron Record archive (Iron Rank 6 required)"},
+        {"id": "obj_02", "text": "Read the 2372 mission report (standard accessible record)"},
+        {"id": "obj_03", "text": "Find the classified addendum to the 2372 mission report"},
+        {"id": "obj_04", "text": "Cross-reference the addendum with the publicly available Shattered Belt casualty list"}
+      ],
+      "rewards": {"credits": 5400, "faction_rep": {"iron_sovereignty": 840}, "xp": 10800},
+      "discovered_discrepancy": "The 2372 mission report lists 12 soldiers, 4 survivors. The classified addendum lists a 5th survivor who was 'reassigned to classified duties' and not mentioned publicly. The reassignment date: 2369 — the same year Phantom Null Osei is first documented. The connection is not made explicit in the quest."
+    },
+    {
+      "quest_id": "SQ-047",
+      "title": "The Number in the Wall",
+      "type": "easter_egg_quest",
+      "trigger": "interact_with_wall_inscription_docking_ring_delta7",
+      "description": "On the inner wall of Docking Ring Delta-7, barely visible behind a maintenance conduit, someone has carved the number 0.8847 into the metal. It is old — the corrosion pattern suggests it was carved when the station was first constructed in 2334–2341. Below it, in smaller characters: 'She was right. — M.F.' The quest activates when you photograph the inscription.",
+      "objectives": [
+        {"id": "obj_01", "text": "Photograph the inscription"},
+        {"id": "obj_02", "text": "Show it to Malo Fenn"},
+        {"id": "obj_03", "text": "Ask Fenn about his family history"},
+        {"id": "obj_04", "text": "Find the corresponding inscription in the Resonance Chamber"}
+      ],
+      "rewards": {"credits": 847, "xp": 4700, "items": ["VP-ITEM-00724"]},
+      "resolution": "Malo Fenn reveals that his great-grandmother worked on the station's construction and knew Thessa Vorin personally. The 'M.F.' inscription was hers — Maya Fenn, Malo's ancestor. Maya believed from the beginning that Vorin's design was broadcasting something. She carved the frequency as evidence. Malo has been staring at it from his workstation window for 20 years without knowing it was there.",
+      "quest_number_significance": "SQ-047 — the quest number is 47, matching the Iron Sovereignty motif. This is intentional: Malo Fenn spent his career in Iron Sovereignty-affiliated infrastructure before they existed as a formal faction. His ancestor's discovery belongs in their number."
+    }
+  ],
+  "daily_missions": [
+    {
+      "mission_id": "DLY-001",
+      "title": "Rift Patrol: Shattered Belt Outer",
+      "type": "combat",
+      "refresh_cycle": "daily",
+      "objectives": [
+        {"text": "Defeat 12 Drifter entities in the Shattered Belt Outer zone"},
+        {"text": "Collect 3 Void Shard (Small) materials"}
+      ],
+      "rewards": {"credits": 840, "faction_rep": {"any": 47}, "xp": 1680},
+      "time_limit_minutes": 30
+    },
+    {
+      "mission_id": "DLY-002",
+      "title": "Entropy Management: Kedraxis-7 Vorak",
+      "type": "survival",
+      "refresh_cycle": "daily",
+      "objectives": [
+        {"text": "Complete a 10-minute combat session in Vorak without triggering a Cascade event"},
+        {"text": "Zone entropy_level must not exceed 0.7 at any point"}
+      ],
+      "rewards": {"credits": 1200, "faction_rep": {"any": 84}, "xp": 2400},
+      "time_limit_minutes": 15
+    },
+    {
+      "mission_id": "DLY-003",
+      "title": "Exchange Operations",
+      "type": "economy",
+      "refresh_cycle": "daily",
+      "objectives": [
+        {"text": "List 3 items on the Rift Exchange"},
+        {"text": "Complete 1 purchase on the Rift Exchange"}
+      ],
+      "rewards": {"credits": 470, "void_shards": 4, "xp": 940}
+    },
+    {
+      "mission_id": "DLY-004",
+      "title": "Faction Contribution",
+      "type": "faction",
+      "refresh_cycle": "daily",
+      "objectives": [
+        {"text": "Complete 2 faction-specific missions (any of the faction's repeatable content)"},
+        {"text": "Participate in a Breach Wars match"}
+      ],
+      "rewards": {"credits": 1600, "faction_rep": {"player_faction": 200}, "xp": 3200}
+    }
+  ],
+  "weekly_missions": [
+    {
+      "mission_id": "WKL-001",
+      "title": "Architect Challenge",
+      "type": "boss",
+      "refresh_cycle": "weekly",
+      "architect_rotation": "3 of 6 Architects (randomly selected each week)",
+      "objectives": [
+        {"text": "Defeat the 3 weekly Architect targets (solo or co-op)"}
+      ],
+      "rewards": {"architect_tokens": 3, "credits": 8470, "faction_rep": {"any": 470}, "xp": 18000},
+      "lockout": "weekly"
+    },
+    {
+      "mission_id": "WKL-002",
+      "title": "Void Rift Deep Run",
+      "type": "survival",
+      "refresh_cycle": "weekly",
+      "objectives": [
+        {"text": "Survive for 18.5 minutes inside a Void Rift zone (interior)"},
+        {"text": "Do not leave the Rift during the 18.5 minutes"}
+      ],
+      "rewards": {"credits": 4700, "void_shards": 47, "xp": 9400},
+      "note": "18.5 minutes = the point at which biological organisms begin experiencing neurological effects in Ω-Space, per lore document VP-LORE-001 Section 1.2. The mission tests whether players can survive the full danger threshold."
+    },
+    {
+      "mission_id": "WKL-003",
+      "title": "Null Hunt",
+      "type": "event",
+      "refresh_cycle": "weekly",
+      "description": "All three factions cooperate (sort of) to hunt a special Architect variant designated by the Fractured intelligence network. Fractured players earn 2× contribution.",
+      "objectives": [
+        {"text": "Defeat the weekly Null Hunt Architect target"},
+        {"text": "Contribute at least 47,000 damage to the fight"}
+      ],
+      "rewards": {"credits": 6400, "faction_rep": {"player_faction": 840, "the_fractured_bonus": 840}, "xp": 12800}
+    }
+  ],
+  "architect_quests": [
+    {
+      "quest_id": "AQ-001",
+      "title": "First Among Architects",
+      "type": "achievement_quest",
+      "description": "Defeat all 6 Architects at least once.",
+      "architects_required": ["null_form_theta", "elder_warform_theta_9", "the_hollow_king", "warform_prime", "the_undivided", "cascade_sovereign"],
+      "rewards": {"credits": 18470, "void_shards": 184, "xp": 84700, "title": "Architect Slayer"},
+      "trigger": "all_six_architects_defeated"
+    },
+    {
+      "quest_id": "AQ-002",
+      "title": "Mowat's Folly (Achievement)",
+      "type": "achievement_quest",
+      "description": "Obtain Mowat's Folly (VP-ITEM-00847).",
+      "item_required": "VP-ITEM-00847",
+      "rewards": {"credits": 8470, "void_shards": 84, "xp": 18000, "title": "The Math Error"},
+      "trigger": "mowats_folly_obtained",
+      "lore_note": "The 'Math Error' title was suggested by Seren Alyx Mowat herself. It is displayed as [THE MATH ERROR] before the player name."
+    }
+  ]
+}

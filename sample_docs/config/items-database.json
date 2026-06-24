@@ -1,0 +1,658 @@
+{
+  "_meta": {
+    "document_id": "VP-ITEMS-001",
+    "version": "1.3.2",
+    "game": "Void Protocol",
+    "studio": "Darkfield Interactive",
+    "total_items": 147,
+    "last_updated": "2025-03-11"
+  },
+  "weapons": [
+    {
+      "id": "VP-ITEM-00001",
+      "name": "Standard Kinetic Repeater",
+      "type": "weapon",
+      "subtype": "rifle",
+      "tier": 1,
+      "tier_name": "standard",
+      "base_damage": 95,
+      "damage_type": "kinetic",
+      "vrf_bonus": 0.01,
+      "resonance_affinity": "void_warden",
+      "attack_speed_per_sec": 2.1,
+      "range_meters": 22,
+      "description": "Standard-issue Terran Compact kinetic repeater. Reliable, unremarkable.",
+      "drop_zones": ["new_amora_station", "kedraxis_vorak"],
+      "vendor_price_credits": 240,
+      "sell_price_credits": 48
+    },
+    {
+      "id": "VP-ITEM-00002",
+      "name": "Void Pulse Pistol Mk.I",
+      "type": "weapon",
+      "subtype": "pistol",
+      "tier": 1,
+      "tier_name": "standard",
+      "base_damage": 74,
+      "damage_type": "void",
+      "vrf_bonus": 0.02,
+      "resonance_affinity": "rift_channeler",
+      "attack_speed_per_sec": 2.8,
+      "range_meters": 16,
+      "description": "Entry-level void-tech pistol. VRF amplification is minimal but present.",
+      "drop_zones": ["new_amora_station", "shattered_belt_outer"],
+      "vendor_price_credits": 310,
+      "sell_price_credits": 62
+    },
+    {
+      "id": "VP-ITEM-00010",
+      "name": "Refined Phase Scatter",
+      "type": "weapon",
+      "subtype": "shotgun",
+      "tier": 2,
+      "tier_name": "refined",
+      "base_damage": 180,
+      "damage_type": "void",
+      "vrf_bonus": 0.04,
+      "resonance_affinity": "phase_breaker",
+      "attack_speed_per_sec": 0.9,
+      "range_meters": 10,
+      "splash_radius_meters": 3.0,
+      "description": "Short-range scatter weapon favored by Phase Breakers. Harvests VRF on each hit.",
+      "mode": "C",
+      "vrf_harvest_per_shot": 0.0021,
+      "drop_zones": ["kedraxis_vorak", "the_null_web"],
+      "vendor_price_credits": 1200,
+      "sell_price_credits": 240
+    },
+    {
+      "id": "VP-ITEM-00024",
+      "name": "Augmented Resonance Rifle",
+      "type": "weapon",
+      "subtype": "rifle",
+      "tier": 3,
+      "tier_name": "augmented",
+      "base_damage": 312,
+      "damage_type": "void",
+      "vrf_bonus": 0.09,
+      "resonance_affinity": "rift_channeler",
+      "attack_speed_per_sec": 1.4,
+      "range_meters": 38,
+      "crit_chance_bonus_pct": 4.2,
+      "description": "Precision void rifle. Each shot contributes 0.0021 to zone VRF.",
+      "vrf_contribution_per_shot": 0.0021,
+      "drop_zones": ["shattered_belt_rift_nodes", "the_communion_spire"],
+      "architect_token_cost": 2,
+      "sell_price_credits": 1840
+    },
+    {
+      "id": "VP-ITEM-00047",
+      "name": "Volhari's Reckoning",
+      "type": "weapon",
+      "subtype": "assault_rifle",
+      "tier": 4,
+      "tier_name": "void_touched",
+      "base_damage": 447,
+      "damage_type": "kinetic",
+      "secondary_damage": 84,
+      "secondary_damage_type": "void",
+      "vrf_bonus": 0.15,
+      "resonance_affinity": "void_warden",
+      "attack_speed_per_sec": 3.2,
+      "range_meters": 28,
+      "lore": "Replica of Marshal Drek Volhari's personal service weapon, recovered from the Shattered Belt in 2372. The original was lost with his right arm. This replica was commissioned by Iron Sovereignty artisans in 2381.",
+      "passives": [
+        {
+          "id": "iron_memory",
+          "description": "Kills with this weapon grant +47 credits",
+          "credit_bonus_per_kill": 47
+        }
+      ],
+      "exclusive_faction": "iron_sovereignty",
+      "exclusive_rank_required": 7,
+      "sell_price_credits": 18400
+    },
+    {
+      "id": "VP-ITEM-00084",
+      "name": "Rhae's Resonant Staff",
+      "type": "weapon",
+      "subtype": "staff",
+      "tier": 4,
+      "tier_name": "void_touched",
+      "base_damage": 380,
+      "damage_type": "void",
+      "vrf_bonus": 0.19,
+      "resonance_affinity": "entropy_warden",
+      "attack_speed_per_sec": 1.1,
+      "range_meters": 20,
+      "splash_radius_meters": 3.7,
+      "lore": "Designed by Elder Cassian Rhae's personal research team. The staff's crystal focuses resonance at exactly 0.8847 Hz — matching the universal VRF constant and (according to Rhae) creating a frequency recognizable to Void entities.",
+      "passives": [
+        {
+          "id": "resonance_frequency",
+          "description": "Attacks briefly pacify non-Architect Void entities for 0.8 seconds",
+          "pacify_duration_seconds": 0.8
+        }
+      ],
+      "exclusive_faction": "voidborn_conclave",
+      "exclusive_rank_required": 7,
+      "sell_price_credits": 20100
+    },
+    {
+      "id": "VP-ITEM-00847",
+      "name": "Mowat's Folly",
+      "type": "weapon",
+      "subtype": "pistol",
+      "tier": 5,
+      "tier_name": "architect_forged",
+      "base_damage": 847,
+      "damage_type": "void",
+      "vrf_bonus": 0.40,
+      "resonance_affinity": "rift_channeler",
+      "attack_speed_per_sec": 2.0,
+      "range_meters": 24,
+      "lore": "Named after Lead Systems Designer Seren Alyx Mowat. During early development (build 0.4.7), a formula error resulted in a pistol with 3× its intended resonance amplification. The team preserved it as a legendary endgame reward. The passive damage coefficient of 0.8847 is intentional — matching the universal VRF constant.",
+      "passives": [
+        {
+          "id": "resonance_feedback",
+          "description": "Every 7th shot triggers a miniature void cascade on the target",
+          "trigger_every_n_shots": 7,
+          "cascade_damage_coefficient": 0.8847,
+          "cascade_damage_type": "void",
+          "cascade_radius_meters": 3.7,
+          "cascade_source": "weapon_power"
+        }
+      ],
+      "drop_sources": ["elder_warform_theta_9", "cascade_sovereign"],
+      "drop_chance_pct": 0.47,
+      "sell_price_credits": 0,
+      "untradeable": true,
+      "note": "Cannot be sold or traded. Bind on Pickup."
+    },
+    {
+      "id": "VP-ITEM-00901",
+      "name": "Null's Edge",
+      "type": "weapon",
+      "subtype": "blade",
+      "tier": 5,
+      "tier_name": "architect_forged",
+      "base_damage": 720,
+      "damage_type": "void",
+      "secondary_damage": 180,
+      "secondary_damage_type": "neural",
+      "vrf_bonus": 0.34,
+      "resonance_affinity": "phase_breaker",
+      "attack_speed_per_sec": 2.4,
+      "range_meters": 3,
+      "lore": "A blade reportedly carried by Phantom 'Null' Osei in the early years of The Fractured. Whether this is the genuine artifact or one of dozens of claimed replicas is unknown. Osei has neither confirmed nor denied its authenticity in any of the recorded Null's Sermons.",
+      "passives": [
+        {
+          "id": "phase_edge",
+          "description": "Melee hits apply Phase Shift for 0.4 seconds (half the normal Phase Slip duration)",
+          "phase_shift_duration_seconds": 0.4
+        },
+        {
+          "id": "void_neural_split",
+          "description": "40% of void damage converts to neural damage against shielded targets",
+          "conversion_pct": 40,
+          "condition": "target_has_shield"
+        }
+      ],
+      "exclusive_faction": "the_fractured",
+      "exclusive_rank_required": 9,
+      "sell_price_credits": 0,
+      "untradeable": true
+    }
+  ],
+  "armor": [
+    {
+      "id": "VP-ITEM-00200",
+      "name": "Station Worker's Vest",
+      "type": "armor",
+      "slot": "chest",
+      "tier": 1,
+      "tier_name": "standard",
+      "base_armor": 40,
+      "shield_bonus": 0,
+      "vrf_bonus": 0.00,
+      "resonance_affinity": null,
+      "description": "Standard New Amora Station worker's protective vest. Not designed for combat.",
+      "vendor_price_credits": 180,
+      "sell_price_credits": 36
+    },
+    {
+      "id": "VP-ITEM-00220",
+      "name": "Sovereignty Combat Plate",
+      "type": "armor",
+      "slot": "chest",
+      "tier": 3,
+      "tier_name": "augmented",
+      "base_armor": 180,
+      "shield_bonus": 120,
+      "vrf_bonus": 0.07,
+      "resonance_affinity": "void_warden",
+      "kinetic_resistance_pct": 12.0,
+      "description": "Iron Sovereignty standard combat plate. The VRF-suppressive lining reduces resonance buildup from kinetic weapon fire.",
+      "passives": [
+        {
+          "id": "kinetic_dampening",
+          "description": "Reduces VRF contribution of kinetic damage by 20%",
+          "vrf_reduction_kinetic_pct": 20
+        }
+      ],
+      "drop_zones": ["the_forgeheart"],
+      "sell_price_credits": 2100
+    },
+    {
+      "id": "VP-ITEM-00247",
+      "name": "Conclave Resonance Robes",
+      "type": "armor",
+      "slot": "chest",
+      "tier": 3,
+      "tier_name": "augmented",
+      "base_armor": 100,
+      "shield_bonus": 80,
+      "vrf_bonus": 0.11,
+      "resonance_affinity": "rift_channeler",
+      "void_resistance_pct": 8.0,
+      "description": "Woven from void-thread, these robes resonate at 0.8847 Hz — the frequency Elder Cassian Rhae believes is recognizable to Void entities.",
+      "passives": [
+        {
+          "id": "void_harmonic",
+          "description": "While below cascade threshold, VRE regeneration increases by 14.7%",
+          "condition": "zone_vrf_below_cascade_threshold",
+          "vre_regen_bonus_pct": 14.7
+        }
+      ],
+      "exclusive_faction": "voidborn_conclave",
+      "exclusive_rank_required": 7,
+      "sell_price_credits": 3200
+    },
+    {
+      "id": "VP-ITEM-00291",
+      "name": "Fractured Assembly Armor",
+      "type": "armor",
+      "slot": "chest",
+      "tier": 3,
+      "tier_name": "augmented",
+      "base_armor": 140,
+      "shield_bonus": 100,
+      "vrf_bonus": 0.08,
+      "resonance_affinity": "phase_breaker",
+      "description": "Mismatched armor plates from multiple sources. Chaotic construction inadvertently creates resonance harmonics at 3.7 Hz.",
+      "passives": [
+        {
+          "id": "chaotic_resonance",
+          "description": "When Phase Slip activates, nearby enemies take 37 void damage",
+          "damage_on_phase_slip": 37,
+          "radius_meters": 3.7
+        }
+      ],
+      "exclusive_faction": "the_fractured",
+      "exclusive_rank_required": 7,
+      "sell_price_credits": 2800
+    },
+    {
+      "id": "VP-ITEM-00400",
+      "name": "Voidborn Shield Matrix",
+      "type": "armor",
+      "slot": "chest",
+      "tier": 4,
+      "tier_name": "void_touched",
+      "base_armor": 220,
+      "shield_bonus": 180,
+      "vrf_bonus": 0.18,
+      "resonance_affinity": "entropy_warden",
+      "void_resistance_pct": 14.7,
+      "description": "Constructed from plates harvested from a VE-Type II entity shell. Offers unusually high void resistance.",
+      "passives": [
+        {
+          "id": "entity_origin",
+          "description": "Non-Architect Void entities have a 22% reduced chance to target the wearer while entity aggression < Frenzied",
+          "aggression_reduction_pct": 22,
+          "excluded_types": ["architect"]
+        }
+      ],
+      "drop_zones": ["void_rift_interior", "shattered_belt_rift_nodes"],
+      "sell_price_credits": 18000
+    }
+  ],
+  "helmets": [
+    {
+      "id": "VP-ITEM-00300",
+      "name": "Standard Combat Helmet",
+      "type": "armor",
+      "slot": "helmet",
+      "tier": 1,
+      "tier_name": "standard",
+      "base_armor": 30,
+      "shield_bonus": 0,
+      "vrf_bonus": 0.00,
+      "neural_resistance_pct": 5.0,
+      "description": "Basic protective helmet with HUD integration.",
+      "vendor_price_credits": 150,
+      "sell_price_credits": 30
+    },
+    {
+      "id": "VP-ITEM-00322",
+      "name": "Resonance Sensor Helm",
+      "type": "armor",
+      "slot": "helmet",
+      "tier": 3,
+      "tier_name": "augmented",
+      "base_armor": 90,
+      "shield_bonus": 60,
+      "vrf_bonus": 0.08,
+      "resonance_affinity": "resonance_engineer",
+      "description": "Features an integrated VRF sensor array. Displays zone entropy_level on HUD with 0.001 precision (default HUD shows 0.01 precision).",
+      "passives": [
+        {
+          "id": "entropy_readout",
+          "description": "HUD displays entropy_level at 3-decimal precision; alerts at 0.5, 0.7, 0.9 thresholds",
+          "alert_thresholds": [0.5, 0.7, 0.9]
+        }
+      ],
+      "drop_zones": ["new_amora_station_resonance_chamber"],
+      "sell_price_credits": 2400
+    },
+    {
+      "id": "VP-ITEM-00347",
+      "name": "Phantom's Veil",
+      "type": "armor",
+      "slot": "helmet",
+      "tier": 4,
+      "tier_name": "void_touched",
+      "base_armor": 140,
+      "shield_bonus": 80,
+      "vrf_bonus": 0.14,
+      "resonance_affinity": "shadow_operative",
+      "neural_resistance_pct": 22.0,
+      "description": "Season 1 exclusive cosmetic helmet with integrated stealth dampeners. Reduces noise emissions during stealth abilities by 47%.",
+      "passives": [
+        {
+          "id": "silent_phantom",
+          "description": "Stealth abilities produce 47% less audio signature; enemy detection range reduced by 14.7% while cloaked",
+          "audio_reduction_pct": 47,
+          "detection_range_reduction_pct": 14.7
+        }
+      ],
+      "source": "breach_wars_ranked_season_1_gold",
+      "sell_price_credits": 0,
+      "untradeable": true
+    }
+  ],
+  "accessories": [
+    {
+      "id": "VP-ITEM-00500",
+      "name": "Basic Resonance Crystal (Tier 1)",
+      "type": "accessory",
+      "slot": "resonance_crystal",
+      "tier": 1,
+      "tier_name": "standard",
+      "vrf_bonus": 0.01,
+      "resonance_affinity": null,
+      "description": "Entry-level resonance crystal. Provides minor VRF enhancement.",
+      "vendor_price_credits": 100,
+      "sell_price_credits": 20
+    },
+    {
+      "id": "VP-ITEM-00547",
+      "name": "VRF Stabilizer Ring",
+      "type": "accessory",
+      "slot": "accessory",
+      "tier": 3,
+      "tier_name": "augmented",
+      "vrf_bonus": 0.06,
+      "resonance_affinity": null,
+      "description": "Modeled after New Amora Station's VRF stabilizer technology, miniaturized to accessory scale.",
+      "passives": [
+        {
+          "id": "stabilization_field",
+          "description": "When wearer's personal VRF exceeds 1.0, reduce EDR contribution by 40%",
+          "trigger_vrf_threshold": 1.0,
+          "edr_contribution_reduction_pct": 40
+        }
+      ],
+      "drop_zones": ["new_amora_station_resonance_chamber", "the_communion_spire"],
+      "sell_price_credits": 3700
+    },
+    {
+      "id": "VP-ITEM-00584",
+      "name": "Entropy Anchor",
+      "type": "accessory",
+      "slot": "accessory",
+      "tier": 4,
+      "tier_name": "void_touched",
+      "vrf_bonus": 0.12,
+      "resonance_affinity": "resonance_engineer",
+      "description": "A device that anchors local entropy, preventing runaway accumulation. Standard gear for all New Amora Station engineering staff.",
+      "passives": [
+        {
+          "id": "entropy_anchor_passive",
+          "description": "Once per combat encounter, when entropy_level would cross 0.8, reduce it to 0.47 instead",
+          "trigger_threshold": 0.8,
+          "reduction_target": 0.47,
+          "once_per_encounter": true
+        }
+      ],
+      "drop_zones": ["void_rift_interior"],
+      "sell_price_credits": 14700
+    }
+  ],
+  "consumables": [
+    {
+      "id": "VP-ITEM-00600",
+      "name": "Standard Med-Patch",
+      "type": "consumable",
+      "tier": 1,
+      "description": "Restores 240 HP. Does not restore shield.",
+      "hp_restore": 240,
+      "cast_time_seconds": 1.4,
+      "cooldown_seconds": 37,
+      "stack_size": 10,
+      "vendor_price_credits": 47,
+      "sell_price_credits": 9
+    },
+    {
+      "id": "VP-ITEM-00601",
+      "name": "Shield Recharge Cell",
+      "type": "consumable",
+      "tier": 1,
+      "description": "Instantly restores 340 Shield. Does not restore HP.",
+      "shield_restore": 340,
+      "cast_time_seconds": 0.8,
+      "cooldown_seconds": 47,
+      "stack_size": 10,
+      "vendor_price_credits": 62,
+      "sell_price_credits": 12
+    },
+    {
+      "id": "VP-ITEM-00610",
+      "name": "Void Resonance Boost",
+      "type": "consumable",
+      "tier": 2,
+      "description": "Increases personal VRF contribution by 0.08 for 47 seconds. Doubles VRE regeneration during this period. Risk: also increases personal EDR contribution by 0.0042.",
+      "vrf_boost": 0.08,
+      "duration_seconds": 47,
+      "vre_regen_multiplier": 2.0,
+      "edr_contribution_increase": 0.0042,
+      "cast_time_seconds": 0.4,
+      "cooldown_seconds": 120,
+      "stack_size": 5,
+      "vendor_price_credits": 240,
+      "sell_price_credits": 48
+    },
+    {
+      "id": "VP-ITEM-00620",
+      "name": "Entropy Suppression Flask",
+      "type": "consumable",
+      "tier": 3,
+      "description": "Reduces zone entropy_level by 0.12. Best used before crossing the 0.6 threshold to prevent Frenzied state.",
+      "entropy_reduction": 0.12,
+      "cast_time_seconds": 0.8,
+      "cooldown_seconds": 90,
+      "stack_size": 3,
+      "vendor_price_credits": 840,
+      "sell_price_credits": 168
+    }
+  ],
+  "collectibles": [
+    {
+      "id": "VP-ITEM-00700",
+      "name": "Solis Archive: Entry 001",
+      "type": "collectible",
+      "collectible_series": "solis_archive",
+      "series_total": 47,
+      "description": "Audio log from Data Archivist Solis. Entry 001: 'The Unraveling, 2301-06-15. Dr. Lin Chen's field notes describe the initial Void entity emergence above K7-III. She records the sound frequency as approximately 0.8847 Hz — a measurement she describes as \"hauntingly precise.\" I have cross-referenced 84 subsequent measurements of Void entity vocalizations. The frequency is always 0.8847 Hz, regardless of entity type or zone location.'",
+      "zone_found": "new_amora_station_concourse",
+      "lore_unlock": "voidborn_conclave_history_1"
+    },
+    {
+      "id": "VP-ITEM-00724",
+      "name": "Letters from the Pale Moon: Entry 003",
+      "type": "collectible",
+      "collectible_series": "letters_pale_moon",
+      "series_total": 12,
+      "description": "Text transmission from Technician Petra Solis to her family on Kedraxis-7 surface, dated 2301-05-14 (22 days before her death). 'The moon is beautiful tonight. There's a shimmer in the void above K7-III — probably just the Kesslerium deposits refracting starlight. Facility Manager Chen-Alvarez says the sensors are picking up a reading she's never seen before, something at exactly 0.8847 on the resonance scale. She's filed a report. I'm sure it's nothing. Miss you all. — Petra'",
+      "zone_found": "kedraxis_northern_ruin",
+      "lore_unlock": "unraveling_prelude"
+    },
+    {
+      "id": "VP-ITEM-00784",
+      "name": "Null's Sermon: Entry 003",
+      "type": "collectible",
+      "collectible_series": "null_sermons",
+      "series_total": 8,
+      "description": "Audio recording of Phantom 'Null' Osei addressing a Fractured gathering, date unknown. 'They tell you the number is 0.8847. They say it's a physics constant. But the first Rift opened on 2301-06-15 at 03:47:22 UTC. Do you see it? 0.3 — 47 — 22. You're living in a design, and 0.8847 is their signature. The people in the Resonance Chamber know this. Why do you think they keep it restricted?'",
+      "zone_found": "the_null_web",
+      "lore_unlock": "null_conspiracy_theory"
+    },
+    {
+      "id": "VP-ITEM-00801",
+      "name": "Rhae's Codex (Audio)",
+      "type": "collectible",
+      "collectible_series": "unique_drops",
+      "series_total": null,
+      "drop_source": "elder_warform_theta_9",
+      "drop_chance_pct": 3.7,
+      "description": "Audio recording by Elder Cassian Rhae, dated 2351-09-12 (Rhae age 35). 'First direct observation of a VE-Type IV. It has been sitting in the Communion Spire's apex chamber for 6 days. Today it turned to face me directly. It did not attack. It... resonated. My equipment showed a sustained 0.8847 Hz emission. Then it turned away. I do not know what this means. I know what I hope it means. I have 36 more years to find out.'",
+      "zone_found": "the_communion_spire",
+      "lore_unlock": "cassian_first_contact"
+    },
+    {
+      "id": "VP-ITEM-00847",
+      "name": "Note: You already have Mowat's Folly as item 00847 in weapons section",
+      "type": "note",
+      "internal_note": "Item IDs starting with 008xx are reserved for Architect-Forged tier items with unique lore significance. Mowat's Folly (00847) was assigned this ID to match the Drifter base HP value and the designer's name, creating a chain of thematic resonance."
+    }
+  ],
+  "crafting_materials": [
+    {
+      "id": "VP-ITEM-00900",
+      "name": "Void Shard (Small)",
+      "type": "material",
+      "description": "A crystallized fragment of Void Resonance energy. Used in crafting Augmented-tier void-affinity gear.",
+      "crafting_uses": ["augmented_void_gear"],
+      "vendor_price_credits": 840,
+      "sell_price_credits": 420,
+      "stack_size": 99
+    },
+    {
+      "id": "VP-ITEM-00901",
+      "name": "Kesslerium Fragment",
+      "type": "material",
+      "description": "A fragment of Kesslerium ore from Kedraxis-7's crust. Essential for constructing FTL-drive components and high-grade armor plating.",
+      "market_value_per_gram": 4200,
+      "crafting_uses": ["architect_forged_armor", "void_tech_weapons"],
+      "drop_zones": ["kedraxis_vorak", "the_forgeheart"],
+      "sell_price_credits": 1800,
+      "stack_size": 20
+    },
+    {
+      "id": "VP-ITEM-00920",
+      "name": "Architect Token",
+      "type": "material",
+      "description": "A token earned by defeating an Architect-class entity. Required to purchase Architect-Forged tier gear from the Architect Forge vendor.",
+      "vendor": "architect_forge",
+      "crafting_uses": ["architect_forged_gear"],
+      "drop_sources": ["all_architects"],
+      "drop_quantity_per_kill": 1,
+      "sell_price_credits": 0,
+      "untradeable": true,
+      "stack_size": 99
+    },
+    {
+      "id": "VP-ITEM-00930",
+      "name": "Hollow King's Core",
+      "type": "material",
+      "description": "Extracted from The Hollow King's central resonance node after defeat. Required for Fractured Rank 8 armor crafting.",
+      "drop_sources": ["the_hollow_king"],
+      "drop_quantity_per_kill": 1,
+      "crafting_uses": ["fractured_rank_8_armor"],
+      "sell_price_credits": 0,
+      "untradeable": true,
+      "stack_size": 1
+    }
+  ],
+  "cosmetics": [
+    {
+      "id": "VP-COS-00001",
+      "name": "Voidborn Conclave Initiate Armor Set",
+      "type": "cosmetic",
+      "category": "armor_skin",
+      "faction": "voidborn_conclave",
+      "source": "faction_rank_1",
+      "description": "Purple and silver armor skin with organic curves and bioluminescent accents. Granted upon joining the Voidborn Conclave.",
+      "affects_slots": ["chest", "helmet", "legs", "boots"]
+    },
+    {
+      "id": "VP-COS-00002",
+      "name": "Iron Sovereignty Initiate Armor Set",
+      "type": "cosmetic",
+      "category": "armor_skin",
+      "faction": "iron_sovereignty",
+      "source": "faction_rank_1",
+      "description": "Dark charcoal and gold armor skin with angular military design and visible battle wear.",
+      "affects_slots": ["chest", "helmet", "legs", "boots"]
+    },
+    {
+      "id": "VP-COS-00003",
+      "name": "Fractured Initiate Armor Set",
+      "type": "cosmetic",
+      "category": "armor_skin",
+      "faction": "the_fractured",
+      "source": "faction_rank_1",
+      "description": "Chaotic mismatched armor skin spray-painted with Fractured symbols. Void energy visibly leaks from cracks.",
+      "affects_slots": ["chest", "helmet", "legs", "boots"]
+    },
+    {
+      "id": "VP-COS-00047",
+      "name": "Fractured Chrome Weapon Skin",
+      "type": "cosmetic",
+      "category": "weapon_skin",
+      "faction": "the_fractured",
+      "source": "v1.3_patch_content",
+      "void_shards_cost": 840,
+      "description": "Chrome-finish weapon skin with fractured void-energy patterns. Available in the Void Shard store from v1.3 onward."
+    },
+    {
+      "id": "VP-COS-00100",
+      "name": "Void Architect Title",
+      "type": "cosmetic",
+      "category": "title",
+      "source": "breach_wars_ranked_season_1_architect_tier",
+      "description": "Exclusive title for players who reached Architect rank (top 0.1%) in Breach Wars Ranked Season 1. Displayed as [VOID ARCHITECT] before player name.",
+      "untradeable": true
+    },
+    {
+      "id": "VP-COS-00184",
+      "name": "Void Veteran Aura",
+      "type": "cosmetic",
+      "category": "aura",
+      "source": "void_mastery_100000",
+      "description": "A persistent void-energy aura awarded for reaching 100,000 Void Mastery. The aura pulses at 0.8847 Hz.",
+      "pulse_frequency_hz": 0.8847,
+      "untradeable": true
+    }
+  ]
+}

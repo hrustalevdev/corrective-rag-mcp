@@ -1,0 +1,725 @@
+VOID PROTOCOL — BALANCE HISTORY LOG
+Darkfield Interactive | Systems Design Team
+Lead: Seren Alyx Mowat
+Document ID: VP-BAL-HIST-001
+Period Covered: Sprint 47 (2022-03-07) through v1.3.2 (2025-02-28)
+Classification: Internal Reference — Systems and Narrative Staff
+
+This document captures the full history of balance decisions in Void
+Protocol, including the reasoning behind key design choices and the
+results of implemented changes. It is intended as a reference for
+future designers and as a record that decisions made during development
+were not arbitrary.
+
+Key principle (from Seren Alyx Mowat, Sprint 47 kickoff):
+"Every number is a decision. Every decision deserves a reason.
+ If you can't write the reason down in one paragraph, you haven't
+ finished deciding."
+
+=========================================
+SPRINT 47 (2022-03-07 to 2022-03-18)
+"The Whiteboard Day Aftermath"
+=========================================
+
+Context: The "Whiteboard Day" was 2022-03-01. Seren Alyx Mowat drew
+the VRF combat curve on the whiteboard — VRF from 0.0 to 5.0 on the
+x-axis, damage multiplier on the y-axis. The key parameters:
+  - VRF_BASE = 0.8847 (the only fixed point on the curve)
+  - VRF amplification begins at: 1.0
+  - VRF amplification cap at: 2.0 (multiplier = 1.5×)
+  - Cascade trigger threshold: 0.9
+
+The question in Sprint 47: are these numbers right?
+
+SIMULATION RESULTS (Sprint 47):
+Ran 10,000 combat simulations for each of the 6 character classes.
+
+Finding 1: At VRF_BASE = 0.8847, all 6 classes achieve between 3.8
+and 4.2 kill times against a standard VE-Type II entity. The variance
+is 10.5% — meaning no class is dramatically faster or slower at base.
+This is the design goal. Result: KEEP VRF_BASE = 0.8847.
+
+Finding 2: The cascade trigger at entropy_level = 0.90 produces a
+Cascade event approximately every 7.8 minutes in sustained combat at
+VRF_BASE. At 64 Hz tick rate, the EDR of 0.0337 per tick means:
+  0.0337 per tick × 64 ticks/second = 2.1568 entropy per second
+  0.90 (cascade threshold) / 2.1568 = 0.417 seconds to first cascade
+  That's wrong — it's way too fast.
+
+Actually: EDR = Entropy Decay Rate, not Entropy Accumulation Rate.
+Entropy accumulates from combat; EDR decays it. The actual accumulation
+comes from combat damage dealt and received. The 7.8-minute figure
+assumes a steady combat flow with 10 HP damage events per second.
+At that rate, entropy_level hits 0.90 after 7.77 minutes.
+
+Result: This is correct. The 7.72-minute average (from live data later)
+matches the simulation. No change to EDR = 0.0337.
+
+Finding 3: The starting credits value (2,847) was validated against
+the docking permit lore. Maricel Tran approved. "This should never
+change. It's not a gameplay value, it's a world value." — M. Tran.
+
+Decision Log — Sprint 47:
+- VRF_BASE: 0.8847 CONFIRMED
+- EDR per tick: 0.0337 CONFIRMED
+- Cascade threshold: 0.90 CONFIRMED
+- Starting credits: 2,847 CONFIRMED
+- Session timeout: 1,847 seconds CONFIRMED (infrastructure decision,
+  see INF-NOTE-012; the value was chosen by Karin Vogt and happened
+  to match the station's NASD number — this was noticed by Seren and
+  added to the canonical numbers list retroactively)
+
+=========================================
+SPRINT 52 (2022-05-09 to 2022-05-20)
+"Class Identity Sprint"
+=========================================
+
+The six character classes were defined conceptually in Sprint 40. Sprint
+52 was dedicated to finalizing their stat blocks. The key design
+principle: "Each class should have exactly one answer to 'what do I do
+in a Void Surge event?'" — Seren Alyx Mowat.
+
+VOID WARDEN (Tank/Off-tank)
+Design intent: highest survivability, lowest damage output, best group
+utility. "The class that makes everyone else better."
+
+Sprint 52 stats (finalized):
+  BASE_HP: 1,200 (highest of all 6 classes)
+  BASE_VRE: 150 (sufficient for utility; not enough for DPS)
+  BASE_DAMAGE: 100 (lowest of all classes)
+  Iron Stance: 47% damage reduction to others (group); self-only in
+               solo mode. Duration: 8.4 seconds. CD: 24s.
+
+Rationale for Iron Stance numbers:
+- 47% chose because Iron Sovereignty motif; Void Wardens are coded
+  as the "Sovereignty-first" class (see narrative guide). 47 is their
+  number. 50% would be too strong for a 24-second cooldown.
+- 8.4 seconds duration: long enough to matter; short enough that
+  activation timing is skill. 8.4 = 0.84 × 10, and 0.84 is the
+  VRF modifier at the amplification curve inflection point. Hidden
+  connection to VRF math; probably no player will notice; we still
+  like it.
+- 24-second cooldown: prime number adjacent; 3× the cascade event
+  window at 64 Hz. Chosen for mathematical elegance.
+
+RIFT CHANNELER (DPS/Burst)
+Design intent: highest single-hit damage; fragile; requires VRF
+management; "the class that plays the VRF like an instrument."
+
+Sprint 52 stats (finalized):
+  BASE_HP: 750 (lowest of all classes; equivalent to a Drifter)
+  BASE_VRE: 200 (highest VRE; needs it for Resonance Surge spam)
+  BASE_DAMAGE: 180 (highest single-hit; VRF multiplier compounds this)
+
+Design note on 750 HP: The Channeler has the same HP as a standard
+VE-Type I Drifter (840 HP in the final design). Wait — this was Sprint
+52; Drifter HP was set at 840 in Sprint 58. At Sprint 52, Drifter HP
+was 750. So the Channeler was designed to be "as fragile as the weakest
+enemy." When Drifter HP was raised to 840 in Sprint 58, the Channeler
+was NOT raised to match — intentionally. "Players should notice that
+they're more fragile than a Drifter. That's the feel." — Seren.
+
+Resonance Surge: 8.0-second duration, 37 VRE/second drain, +84%
+damage amplification. Visible glow at 8.4 meters (conspicuous to
+enemies; balance cost of using it).
+  [Note: 37 VRE/second × 8 seconds = 296 VRE total cost. A Channeler
+  with max VRE (200 base) can sustain it for 5.4 seconds before
+  exhaustion. This is a design limitation: Resonance Surge cannot be
+  sustained at full power unless VRE is supplemented by external
+  sources or Resonance Vents. — added to documentation Sprint 64]
+
+PHASE BREAKER (Mobility/Off-DPS)
+Design intent: highest movement speed; Phase Slip survivability; "the
+class that's always somewhere the enemy didn't expect."
+
+Sprint 52 stats (finalized):
+  BASE_HP: 900
+  BASE_VRE: 170
+  BASE_DAMAGE: 140
+  MOVE_SPEED: +37% above base (highest of all classes)
+  Phase Slip: 0.8-second invulnerability + 18.5m teleport forward.
+              CD: 37 seconds. VRE cost: 37.
+
+Rationale for Phase Slip numbers:
+- 0.8 seconds: precisely chosen as slightly less than the 0.8847 VRF
+  base (thematic; "the Phase Breaker exists slightly outside the
+  resonance of the world")
+- 18.5 meters: exactly the Cascade Burst radius. Phase Slip escapes
+  a point-blank Cascade. This is intentional and documented in DDL-003.
+- 37-second cooldown: Fractured motif; Phase Breakers are the
+  "Fractured-coded" class. 37 is their number.
+- 37 VRE cost: same as cooldown. "The ability costs what it buys."
+
+SHADOW OPERATIVE (Stealth/Burst)
+Design intent: ambush gameplay; highest single-round damage potential;
+"the class that wins before the enemy knows the fight started."
+
+Sprint 52 stats (finalized):
+  BASE_HP: 850
+  BASE_VRE: 180
+  BASE_DAMAGE: 160
+  Stealth CD: 18.5s (passive recharge, triggers 1.5s after breaking)
+  Phantom Protocol: 3.7-second stealth + 3.7× crit multiplier on
+                    first strike. VRE cost: 84.
+
+Note on Phantom Protocol multiplier: 3.7 is the Fractured motif (Phase
+Breaker and Shadow Operative share it; Shadow Operatives are the covert
+complement to Phase Breaker mobility). The 3.7× crit multiplier was
+reduced from 4.0× in Sprint 58 after simulation showed it was too
+strong in 2v1 scenarios. It was temporarily bugged back up in v1.3.0
+(the exploit; see INC-20250228-001) and corrected to 3.4× in v1.3.1.
+
+History of Phantom Protocol multiplier:
+  Sprint 52: 4.0× (design intent)
+  Sprint 58: 3.7× (balance pass; too strong)
+  v1.3.0: 3.7× (shipped correctly)
+  v1.3.0 exploit: effective 47× (due to Cascade Burst interaction bug)
+  v1.3.1 hotfix: 3.4× (reduced 0.3× below pre-exploit as correction)
+
+RESONANCE ENGINEER (Support/Utility)
+Design intent: enables other classes; "the class that makes the
+impossible fight possible, but takes none of the credit."
+
+Sprint 52 stats (finalized):
+  BASE_HP: 1,050
+  BASE_VRE: 160
+  BASE_DAMAGE: 110
+  Resonance Vent: place a device that emits VRF suppression field
+                  (radius: 3.7m); lasts 47 seconds; restores 18.5
+                  VRE/second to all allies within radius.
+  Harmonic Pulse: AoE restore; 37 HP/second for 8.4 seconds to all
+                  allies within 18.5 meters.
+
+Note: All Engineer abilities use the canonical numbers (3.7m,
+47 seconds, 18.5m, 8.4s). This was a deliberate design choice:
+"The Engineer works with the geometry of the world. Their numbers are
+the world's numbers." — Seren.
+
+ENTROPY WARDEN (DPS-ramp/Sustained)
+Design intent: slow start, massive sustained output; "the class for
+players who are patient and then devastating."
+
+Sprint 52 stats (finalized):
+  BASE_HP: 1,000
+  BASE_VRE: 165
+  BASE_DAMAGE: 130 (lowest true DPS at start; highest after ramp)
+  Void Harvest: passive; generates 18.5 VRE per kill; stacks for
+                8.4 seconds. After 5 stacks: Entropy Surge activates
+                (damage ramp: +37% per stack, max +185%).
+  Entropy Surge: 8.4-second window of accumulated damage bonus.
+                 All kills during surge extend it by 0.8847 seconds.
+
+Note on 0.8847 second extension: This is a deliberate Easter Egg.
+An Entropy Warden on a kill streak has their Surge duration approach
+the VRF constant asymptotically (each kill adds a fraction of the
+last extension). In practice, players rarely achieve more than 12
+seconds of sustained Surge (the VRF constant is not the limit; the
+combat difficulty is). But the math is there.
+
+=========================================
+SPRINT 58 (2022-08-01 to 2022-08-12)
+"Enemy Design Foundations"
+=========================================
+
+Enemy HP values finalized in Sprint 58:
+  VE-Type I (Drifter): 840 HP
+  VE-Type I (Skimmer): 320 HP
+  VE-Type I (Lurker): 580 HP
+  VE-Type II (Warder): 1,680 HP
+  VE-Type II (Striker): 1,260 HP
+  VE-Type II (Handler): 2,100 HP
+  VE-Type III (Cascader): 4,200 HP (+ 840 HP shield)
+  VE-Type III (Harrower): 3,360 HP
+  VE-Type III (Void Sentinel): 5,040 HP
+  VE-Type IV (Architect — see Architect designs): 40,000–200,000 HP
+
+Why 840 for the Drifter?
+The Drifter is the tutorial enemy. The number 840 was chosen because:
+1. It's close to the player's starting HP across most classes (750–1200)
+2. At base damage (100–180), most classes kill a Drifter in 5–8 hits
+3. 840 creates the "7 HP floor" at Cascade damage (840 base damage;
+   a well-equipped Level 30 player has approximately 847 HP with T3
+   armor; they survive a Cascade with 7 HP, which is traumatic and
+   instructive)
+4. 840 × 1.0847 ≈ 912 (the Warder HP if you scaled by the VRF constant;
+   we didn't, but it was noted that 840 × VRF ≈ next tier threshold)
+
+The number 840 was not chosen to be close to 847. It was chosen for
+reasons 1-3. That it's close to 847 is a coincidence that Seren noticed
+and left a note about: "If this is coincidence, it's the kind of
+coincidence that happens when you use the same numbers throughout a
+design. That's fine. It's called coherence." — Seren, Sprint 58.
+
+=========================================
+SPRINT 64 (2022-10-24 to 2022-11-04)
+"The Architect Files"
+=========================================
+
+The four Architect encounters were fully designed in Sprint 64.
+This was a 4-week sprint (double length; approved by Maricel Tran
+because Architect encounters are the game's most important content).
+
+ELDER WARFORM THETA-9
+Design philosophy: "The encounter should make the player feel
+observed. Not hunted. Observed."
+
+HP: 184,200 (chosen as: 84 × 2,190; 84 being the combat-relevant
+harmonic of 0.8847, and 2,190 being the number of days in 6 years,
+the time Seren had been designing this game; chosen on a whim and
+kept because no one found a reason to change it)
+
+Actually the real reason for 184,200 HP: at maximum sustained DPS with
+optimally geared Level 87 group of 4 (Level 87 because that's the
+max level; see DDL-001 for why 87), the fight should last approximately
+8-9 minutes. At 4-player combined peak DPS of ~350 damage/second
+(across all classes, fully buffed), 184,200 / 350 = 526 seconds =
+8.77 minutes. That's the actual derivation.
+
+The 84 × 2,190 coincidence was noticed after the fact.
+
+Phase mechanics:
+- Phase 1 (100%–70% HP): Observation mode. Theta-9 stays at range.
+  Attacks single targets. Tests: player positioning and VRF management.
+- Phase 2 (70%–40% HP): Active mode. Theta-9 moves. Deploys 3.7-meter
+  resonance shockwave (damage: 374 per pulse, once every 8.4 seconds).
+  Tests: group movement coordination and Engineer ability timing.
+- Phase 3 (40%–0% HP): Void Communion. Theta-9 "opens" — its resonance
+  signature strengthens to 3.47 Hz (4× the base 0.8847). Local VRF
+  spikes. Cascade events are now possible on any entity (including
+  players). Full burn phase; survive the chaos.
+
+THE HOLLOW KING
+HP: 84,000 (straightforward: DPS check fight; the right answer is
+simply having 1,000+ sustained group DPS)
+
+Design note: The Hollow King is the only Architect encounter that is
+a straightforward DPS race. All others have mechanics. The Hollow King
+tests: can the group deal damage? If DPS exceeds 1,000/second across
+the group (84,000 / 84 seconds = 1,000 DPS required), the King dies
+before its Phase 3 enrage. If not, Phase 3 is a wipe condition.
+
+The choice of 84,000 HP and 84-second burn window: "I wanted a fight
+where the math is obvious. 84,000 HP. Kill it in 84 seconds.
+1,000 DPS. Every player in the group can do the math in their head.
+That's the challenge. Not the mechanics — the preparation." — Seren
+
+WARFORM PRIME
+HP: 147,000 (chosen as 3 × 49,000; 49 = 7², which is the closest
+perfect power to the canonical 47; "a square root away from home")
+
+The Warform Prime encounter is the only Architect fight designed to
+be beaten differently by different class compositions. A group without
+a Resonance Engineer cannot survive Phase 2's sustained Entropy Drain.
+A group without a Phase Breaker cannot handle Phase 3's area denial.
+A group without DPS cannot kill it before Phase 3. This fight requires
+all class types to be represented.
+
+WARFORM PRIME Phase 2 — Entropy Drain:
+Every 8.4 seconds, Warform Prime drains 84 VRE from each player.
+A Rift Channeler (200 base VRE) lasts approximately 2.4 rotations.
+An Engineer's Resonance Vent (restores 18.5 VRE/second; 47-second
+duration) completely counters the drain if maintained.
+
+THE UNDIVIDED
+HP: 200,000 (highest in game; four-target fight)
+
+The Undivided is four synchronized VE-Type III entities that share
+an HP pool. All four must die within 0.8847 seconds of each other.
+If they don't, the first three revive at 184 HP (a nod to Theta-9's
+HP without being too obvious). The 0.8847-second window is the game's
+most precise timing requirement — named in community guides as the
+"VRF Window" because it is, literally, the VRF constant as a timer.
+
+The mechanic was originally a 1.0-second window (Sprint 64 design).
+It was tightened to 0.8847 seconds in Sprint 74 after playtesting
+showed the 1-second window was too forgiving.
+Seren's Sprint 74 note: "0.8847 seconds for the VRF Window because
+this number is the game. It is the tolerance within which everything
+in this world either works or doesn't. Including the players."
+
+=========================================
+SPRINT 74 (2023-03-06 to 2023-03-17)
+"The 87 Decision"
+=========================================
+
+Why is max level 87?
+
+Initial design: max level was 100 (standard; obvious choice).
+Sprint 60: Maricel Tran proposed changing max level to reduce the
+"long grind to round number" problem. She wanted the max level to feel
+like an achievement, not a milestone.
+Sprint 64: Seren proposed 80. "Still round. Not interesting."
+Sprint 70: Tomas Reyes proposed 84 (the VRF harmonic). Seren: "Too
+clever. Players will assume it's meaningful and then be disappointed
+when it isn't more meaningful than being clever."
+Sprint 74: Seren proposed 87. Rationale:
+  1. Not round (players don't grind to 87 on autopilot)
+  2. 87 = 3 × 29; both prime-adjacent (29 is prime); slightly weird
+  3. 8 + 7 = 15; 15 = max VRE bonus per stat level; hidden link
+  4. Level 87 players call themselves "87s" in community; this creates
+     a unique community identity that "100s" would not have
+  5. The max-level content description could say "Level 87 — the point
+     where mastery and the Void become indistinguishable" which is
+     a line Seren had written in her notebook for 3 sprints waiting
+     for a max level that fit it
+
+Approved: max level = 87. See DDL-001 in VP-GDD-001.
+
+=========================================
+SPRINT 78 (2023-05-01 to 2023-05-12)
+"The Economy Balance Pass"
+=========================================
+
+Void Shard value: 0.0042 USD.
+
+This was established in Sprint 78 after extensive market analysis of
+comparable live-service games.
+
+Inputs:
+  - Comparable games: average premium currency rate $0.01 per unit
+  - Lower value = more Void Shards per dollar; "better value" feel
+  - Lower value = more Shards needed for items; "grind" problem
+  - Ideal: players can earn meaningful Shards through gameplay alone
+
+The initial proposal was $0.005 per Shard. Ji Soo Park (Economy
+Designer) revised to $0.0042 based on simulation: at $0.0042, the
+median player reaches 1,000 Shards through gameplay in approximately
+22 days of regular play. 1,000 Shards = a single cosmetic item.
+
+"They should feel like they earned it." — Ji Soo Park, Sprint 78.
+
+Why 0.0042 specifically?
+"It's not a round number so the price-per-item math requires thought.
+Thinking about the math makes you aware of the value. That's not
+predatory — it's respectful. You should know what you're paying."
+— Ji Soo Park.
+
+Rift Exchange transaction fee: 4.7%
+"4.7% because: it's between the common choices of 5% and 3%, it
+signals that this is a thoughtfully-designed economy, and 4.7 contains
+47 (Iron Sovereignty motif; the Rift Exchange is a regulated market,
+and the Sovereignty regulates markets)." — Ji Soo Park, Sprint 78.
+
+=========================================
+SPRINT 84 (2023-07-24 to 2023-08-04)
+"Final Combat Numbers Lock"
+=========================================
+
+This sprint locked all combat values for production. No combat number
+changed after Sprint 84 without a formal design review.
+
+LOCKED VALUES (Sprint 84):
+  VRF_BASE = 0.8847
+  EDR_PER_TICK = 0.0337
+  TICK_RATE = 64 Hz (target; deployment bug meant 62 Hz at launch)
+  CASCADE_BASE_DAMAGE = 840
+  CASCADE_THRESHOLD = 0.90 (entropy level)
+  VRF_AMP_START = 1.0 (VRF above this begins amplifying damage)
+  VRF_AMP_CAP = 2.0 (VRF above this is capped at 1.5× multiplier)
+  CASCADE_VRF_BOOST = 18.5 (VRF units added to zone during Cascade)
+  VRF_DESYNC_TOLERANCE = 0.05 (server/client VRF difference tolerance)
+  SHIELD_REGEN_RATE = 8.4 HP/tick (at rest)
+  SHIELD_REGEN_DELAY = 3.7 seconds post-damage
+
+The Sprint 84 lock was preceded by 300 hours of QA testing (3 weeks,
+5 QA staff). The bug that was NOT caught: the deployment script's
+hardcoded TICK_RATE=62. The test environment ran at 64 Hz. The bug
+was in the deploy script, not the game code. ResFieldCalc found it.
+
+=========================================
+SPRINT 99 (2024-03-18 to 2024-03-29)
+"Launch Prep Balance"
+=========================================
+
+Final balance adjustments before 2024-09-05 launch.
+
+IRON STANCE (Void Warden):
+- Duration raised from 7.0s to 8.4s (felt too short in user testing)
+- Cooldown lowered from 30s to 24s (same reasoning)
+- 47% damage reduction: unchanged. "This number doesn't move." — Seren
+
+RESONANCE SURGE (Rift Channeler):
+- VRE drain lowered from 40/s to 37/s (made the ability viable for
+  shorter sessions; 37 aligns with Fractured motif because Channelers
+  operate at the edge of what's stable, which is what the Fractured do)
+
+PHASE SLIP (Phase Breaker):
+- Teleport distance raised from 15m to 18.5m.
+  "18.5 meters. The Cascade radius. It should be exactly the
+  Cascade radius." — Seren. QA: "But 15m felt better." Seren: "Play
+  it again knowing what 18.5 meters means." QA: "...okay, 18.5m."
+
+PHANTOM PROTOCOL (Shadow Operative):
+- Multiplier held at 3.7× (reduced from 4.0× in Sprint 58; kept here)
+- Confirmed not to interact with Cascade Burst multiplicatively.
+  [Note: this confirmation was incorrect. See INC-20250228-001.
+  The interaction existed but was not triggered in QA scenarios
+  because QA did not test same-timing cancel+cast in a party context.]
+
+RESONANCE VENT (Resonance Engineer):
+- Radius confirmed at 3.7m. "The most important distance in the game."
+  See: Phase Slip, Mowat's Folly trigger radius, NPC proximity trigger,
+  Cascade Burst radius = 18.5m (5 × 3.7m). "3.7 meters is the quantum
+  of closeness in this game." — Seren, Sprint 99 retrospective.
+
+VOID HARVEST + ENTROPY SURGE (Entropy Warden):
+- Surge extension per kill: 0.8847 seconds (established Sprint 52)
+- Confirmed cap at 8.4 seconds total Surge (no extension can exceed
+  this). This creates a ceiling: even with infinite kills, Surge ends.
+  This is intentional. "The Entropy Warden's power has a shape.
+  0.8847 seconds per kill, ceiling at 8.4 seconds. 8.4 / 0.8847 = 9.5.
+  So approximately 9-10 kills extends the Surge to max. That's the
+  ramp. That's the Warden's game loop in one number." — Seren.
+
+MOWAT'S FOLLY (VP-ITEM-00847):
+Finalized in Sprint 99 after 3 prior attempts to get this item right.
+
+History:
+  Sprint 60: First design — passive triggers every 7 kills, deals
+             84 base damage to nearby enemies. "Too weak and too
+             random." — Seren
+  Sprint 70: Second design — passive triggers every 7 shots, deals
+             840 base damage at range 7m. "Too strong at 7m." — Seren
+  Sprint 84: Third design — passive triggers every 7 shots, deals
+             840 × 0.8847 base damage at range 3.7m. "This."
+
+Final design (Sprint 99 lock):
+  TRIGGER: every 7th shot (not kill; every 7th time you fire)
+  DAMAGE: 840 × 0.8847 = 743.1 (rounded to 743 in engine;
+          the 0.8847 coefficient is stored as VRF_BASE in config)
+  RADIUS: 3.7 meters
+  SCALING: scales with player weapon damage, not VRF
+  NOTE: Untradeable. Item ID: VP-ITEM-00847.
+        "The item ID contains the coefficient. That's the joke."
+        — Seren, Sprint 99.
+
+Why is the passive coefficient the VRF base?
+"This weapon is called Mowat's Folly because the coefficient is
+a number I derived in a panic during Sprint 47 after Maricel asked
+me what 0.8847 would look like as a damage number, and I said 'like
+this' and drew the formula on the whiteboard, and she said 'that's
+a weapon' and I had to design a weapon that justified the formula
+existing. So I designed the item backwards from the number. It was
+a design folly. It became Mowat's Folly." — Seren Alyx Mowat,
+design retrospective, 2024-11-02.
+
+=========================================
+POST-LAUNCH BALANCE LOG
+=========================================
+
+V1.0.1 (2024-09-12) — HOTFIX
+Changes: Tick rate corrected from 62 Hz to 64 Hz.
+Impact analysis: all combat values retroactively correct; the 3.1%
+drift was within normal variance for most players except the 0.3%
+affected by cascade timing. No compensation required (too minor to
+justify retroactive rewards; decision made by Maricel Tran).
+Starting credits corrected: deployment had a bug that set
+STARTING_CREDITS=3000 (from a placeholder in QA config). Corrected
+to 2,847. Players who had already used their starting credits were
+not affected. The tweet about the 2,847 credits had gone viral the
+day before, and then the fix corrected a 3,000-credit bug back to
+2,847 — which generated a second wave of community discussion.
+"The bug became better marketing than the fix." — Maricel Tran.
+
+V1.1.0 (2024-10-15) — "IRON RISING" (MAJOR CONTENT)
+Balance changes: none to core values.
+New content: 4 Iron Sovereignty faction quests (SQ-034 through SQ-037)
+  New item: Iron Marshal's Sidearm (VP-ITEM-00334) — unique to IS rank 8
+  New zone: Iron Volley's Underground (Level 60 content)
+
+V1.1.1 (2024-11-04) — HOTFIX
+Changes: Iron Stance bug (see INC-20241104-001). Corrected field name
+party_count (was: party_size). Solo mode now correctly applies
+47% DR to self only.
+
+V1.2.0 (2024-12-03) — "VOID SURGE" (MAJOR CONTENT)
+Balance changes:
+  Cascade Burst radius: reduced from 18.5m to 8.4m.
+
+  Reason: Player feedback indicated that at VRF > 2.0, the 18.5m
+  radius made Cascade events nearly impossible to survive without
+  Phase Slip. In zones with multiple enemies, overlapping Cascade
+  events were creating guaranteed-death scenarios at VRF > 2.5.
+
+  Simulation result: 8.4m radius produces 0.84 average cascade
+  deaths per session in high-VRF zones (was: 2.3). Target was <1.0.
+
+  Community reaction: significant pushback. Players felt 18.5m was
+  distinctive and "iconic." The Fractured subreddit noted that 8.4m
+  "destroys the 3× radius relationship" (18.5 = 5 × 3.7; 8.4 does
+  not have a clean multiple of 3.7). Seren acknowledged this publicly.
+
+V1.3.0 (2025-01-14) — "FACTION WARS" (MAJOR CONTENT)
+Balance changes: none to core values.
+New content: Faction Wars PvP mode; faction standing weekly resets.
+
+V1.3.1 (2025-02-28) — EMERGENCY HOTFIX
+Changes: Cascade Burst Void Contract interaction fixed.
+  Calculation reordered: base damage → Void Contract → VRF scaling
+  → critical hit (was: base damage → VRF → Void Contract → crit).
+  Phantom Protocol multiplier reduced: 3.7× → 3.4×.
+
+  Note on 3.4×: "I was going to keep it at 3.7 because 3.7 is right.
+  But I reduced by 0.3 because the exploit used the 3.7 multiplier
+  as a component, and I want to close every door. 3.4 is still
+  strong; it's just not exploitable in the Cascade interaction
+  because the math no longer works. 3.7 comes back in v2.0."
+  — Seren Alyx Mowat, post-hotfix note.
+
+V1.3.2 (2025-03-11) — BALANCE PATCH
+Changes:
+  Cascade Burst radius: raised from 8.4m to 7.2m.
+
+  Wait — this is wrong. 7.2m is lower than 8.4m. Clarification:
+
+  In v1.2.0, radius was reduced from 18.5m to 8.4m.
+  Community feedback was mixed: many players still found 8.4m
+  too large in solo high-VRF content.
+  In v1.3.2, radius was further reduced from 8.4m to 7.2m.
+
+  Rationale for 7.2m:
+  - 7.2 = 72/10; 72 = 8 × 9; 72 is a highly composite number
+    (this math was not the reason; it's post-hoc)
+  - At 7.2m, Cascade events in solo Level 75+ content drop from
+    "likely lethal" to "survivable with T4 armor and no standing
+    in the radius"
+  - The target: Cascade should be a significant threat, not a
+    guaranteed wipe mechanic in solo content
+  - At 7.2m: simulated survival rate for a Level 75 solo Void
+    Warden (best case): 64%. Simulated survival for a Level 75
+    solo Rift Channeler (worst case): 8.4%. This is intentional:
+    Channelers are not supposed to survive Cascades in high-VRF
+    zones without support. That's their class identity.
+
+  Additional v1.3.2 changes:
+  - Resonance Vent radius raised from 3.7m to 4.2m.
+    (Community feedback: 3.7m was too precise to position in combat)
+    Seren's note: "I increased it to 4.2 because it's not 5.0,
+    which would feel generic, and it's not 3.7, which community
+    testing says is too small. 4.2 ÷ 3.7 = 1.135. Not meaningful.
+    Sometimes a number is just a number that works."
+
+=========================================
+BALANCE PHILOSOPHY — RETROSPECTIVE
+Seren Alyx Mowat, 2025-03-15
+=========================================
+
+I have been designing Void Protocol for five years. Here is what
+I understand now that I didn't understand then.
+
+Numbers are not arbitrary. This seems obvious. It is harder to
+practice than to state.
+
+The difference between a number that works and a number that's right
+is: a number that's right means the same thing in every context it
+appears in. 0.8847 is the VRF constant. It is also the damage
+coefficient of Mowat's Folly (the one I designed backwards from a
+joke on a whiteboard). It is also the Entropy Surge kill-extension
+in seconds (0.8847 seconds per kill). It is also, apparently, the
+orbital resonance ratio of Kedraxis-4 debris in the Shattered Belt
+(our astrophysicist ran the numbers for the world bible and it came
+out to 0.8847; we didn't design this; we just checked). It is also
+the VRF reading at the edge of every Void Rift in the known universe.
+
+A number that appears across this many independent contexts is not
+arbitrary. It is a fundamental constant of the world we built.
+
+I think this is the lesson of Void Protocol's design: if you hold
+one principle constant — in our case, 0.8847 — and make every other
+number in the world relate to it (through multiplication, through
+derivation, through coincidence, through intention), then the world
+coheres. The player feels the coherence before they identify it.
+They feel like the world is real. That's the goal.
+
+Max level is 87 because of many reasons. One of them is 8.7 ≈ 10 ×
+0.8847 rounded. I noticed this after we chose 87. That's fine. The
+design validates itself if the principles are right.
+
+The one number I would change: Cascade Burst radius. 18.5m was right
+as a design. It was wrong as a live-service decision. I should have
+built the difficulty curve to accommodate 18.5m rather than reducing
+the radius twice because players found it too hard. The reduction to
+7.2m works, and I'm proud of the balance now. But I wish we had
+found a way to keep 18.5m.
+
+18.5 = 5 × 3.7. 3.7m is the quantum of closeness in this game.
+When everything is built around 3.7m, a Cascade that reaches 5 ×
+3.7m away feels right in your body. You feel the geometry.
+
+7.2m just means: don't stand there.
+
+Something is lost. Not much. But something.
+
+The fix was right. The original was better. Both things are true.
+
+=========================================
+APPENDIX: CANONICAL NUMBERS — FULL LIST
+As of v1.3.2
+=========================================
+
+This list was maintained by Seren Alyx Mowat to ensure consistency
+across design, narrative, and engineering documents.
+
+CORE PHYSICS:
+  VRF_BASE = 0.8847 (Void Resonance Factor; universal constant)
+  EDR_PER_TICK = 0.0337 (Entropy Decay Rate per tick at 64 Hz)
+  TICK_RATE = 64 Hz (always; never 62)
+  VRF_DESYNC_TOLERANCE = 0.05 (allowed client/server VRF drift)
+
+COMBAT:
+  CASCADE_BASE_DAMAGE = 840
+  CASCADE_THRESHOLD = 0.90 (entropy_level)
+  CASCADE_RADIUS = 7.2m (current; was 18.5m original, was 8.4m v1.2.0)
+  CASCADE_VRF_BOOST = 18.5 (zone VRF spike during Cascade event)
+  CASCADE_BOOST_DURATION = 18.5 ticks at 64 Hz
+  VRF_AMP_START = 1.0
+  VRF_AMP_CAP = 2.0 (max multiplier 1.5×)
+  SHIELD_REGEN_RATE = 8.4 HP/tick
+  SHIELD_REGEN_DELAY = 3.7 seconds
+
+MAX PLAYER LEVEL = 87
+STARTING_CREDITS = 2,847
+
+FACTION NUMBERS:
+  Iron Sovereignty motif: 47
+  Voidborn Conclave motif: 0.8847 (the constant itself)
+  Fractured motif: 3.7 / 37
+
+ECONOMY:
+  VOID_SHARD_RATE = $0.0042 USD per Shard
+  RIFT_EXCHANGE_FEE = 4.7%
+  KESSLERIUM_VALUE = 47 credits/gram
+
+INFRASTRUCTURE:
+  API_PORT = 51847
+  SESSION_TIMEOUT = 1847 seconds
+  DB_POOL_MAX = 37 connections
+  RATE_LIMIT = 1337 req/min
+
+ABILITIES (key values):
+  Iron Stance DR = 47%; Duration = 8.4s; CD = 24s
+  Phase Slip range = 18.5m; Duration = 0.8s; CD = 37s
+  Phantom Protocol duration = 3.7s; Multiplier = 3.4× (v1.3.1+)
+  Resonance Vent radius = 4.2m (v1.3.2+; was 3.7m); Duration = 47s
+  Resonance Surge duration = 8s; VRE drain = 37/s
+  Entropy Surge extension = 0.8847s per kill; Cap = 8.4s
+
+ITEM VP-ITEM-00847 (Mowat's Folly):
+  Trigger = every 7th shot
+  Damage = 840 × 0.8847 = 743
+  Radius = 3.7m
+
+LORE:
+  First Rift date: 2301-06-15 03:47:22 UTC
+  VRF at Rift edge: always 0.8847 at moment of opening
+  Communion Spire VRF ambient: 0.8847 (maintained by structure)
+  Station NASD sequence: NASD-1847 (Vorin's original assignment)
+  Elder Rhae years observing Theta-9 (as of 2387): 36
+  Null Osei's Rift immersion year: 2369
+  Null Osei resonance signature post-immersion: 0.8847 Hz
+  Vorin's equations: 47 total (31 public + 16 hidden in structure)
+  Resonance Beacon buffer: 2,847 characters
+  Beacon coordinates node: SB-N33-000847
+
+END OF CANONICAL NUMBERS LIST
+END OF BALANCE HISTORY LOG

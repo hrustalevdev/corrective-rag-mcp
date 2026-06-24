@@ -1,0 +1,370 @@
+{
+  "_meta": {
+    "document_id": "VP-BALANCE-001",
+    "version": "1.3.2",
+    "game": "Void Protocol",
+    "studio": "Darkfield Interactive",
+    "lead_designer": "Seren Alyx Mowat",
+    "last_updated": "2025-03-11",
+    "environment": "production"
+  },
+  "physics": {
+    "void_resonance_factor_base": 0.8847,
+    "void_resonance_factor_cascade_threshold": 1.5,
+    "void_resonance_factor_max_safe": 1.0,
+    "entropy_decay_rate_per_tick": 0.0337,
+    "entropy_decay_rate_void_space": 0.0674,
+    "combat_tick_rate_hz": 64,
+    "void_rift_damage_coefficient": 1.4492,
+    "cascade_base_damage": 840,
+    "cascade_edr_boost_post_event": 0.0042,
+    "cascade_edr_boost_duration_seconds": 18.5,
+    "void_rift_explosion_radius_meters": 18.5,
+    "npc_dialogue_proximity_meters": 3.7,
+    "position_validation_tolerance_ms": 3.7
+  },
+  "player": {
+    "max_level": 87,
+    "starting_credits": 2847,
+    "starting_void_shards": 0,
+    "session_timeout_seconds": 1847,
+    "downed_state_self_revive_seconds": 47,
+    "shield_regen_rate_per_second": 47.3,
+    "shield_regen_delay_seconds": 4.0,
+    "critical_hit_base_chance_pct": 5.0,
+    "critical_hit_multiplier": 2.3,
+    "max_active_rift_exchange_listings": 50,
+    "max_ability_tree_nodes": 47
+  },
+  "economy": {
+    "void_shard_usd_rate": 0.0042,
+    "void_shard_ingame_earn_cap_monthly": 2400,
+    "rift_exchange_transaction_fee_pct": 4.7,
+    "rift_exchange_listing_fee_pct": 1.0,
+    "rift_exchange_listing_min_fee_credits": 5,
+    "rift_exchange_listing_expiry_days": 14,
+    "kesslerium_price_per_gram": 4200,
+    "season_pass_cost_shards": 2400,
+    "season_pass_daily_shard_bonus": 15,
+    "season_pass_duration_days": 90,
+    "transmutation_cost_shards": 10
+  },
+  "classes": {
+    "void_warden": {
+      "base_hp": 1200,
+      "base_shield": 680,
+      "base_vre": 180,
+      "vre_regen_per_sec": 8.4,
+      "movement_speed_ms": 3.1,
+      "crit_chance_base_pct": 5.0
+    },
+    "rift_channeler": {
+      "base_hp": 800,
+      "base_shield": 440,
+      "base_vre": 240,
+      "vre_regen_per_sec": 12.7,
+      "movement_speed_ms": 3.2,
+      "crit_chance_base_pct": 5.0,
+      "crit_chance_ability_bonus_pct": 8.0
+    },
+    "phase_breaker": {
+      "base_hp": 1000,
+      "base_shield": 520,
+      "base_vre": 160,
+      "vre_regen_per_sec": 9.1,
+      "movement_speed_ms": 3.4,
+      "crit_chance_base_pct": 5.0
+    },
+    "shadow_operative": {
+      "base_hp": 900,
+      "base_shield": 380,
+      "base_vre": 120,
+      "vre_regen_per_sec": 6.3,
+      "movement_speed_ms": 3.3,
+      "crit_chance_base_pct": 5.0
+    },
+    "resonance_engineer": {
+      "base_hp": 1100,
+      "base_shield": 560,
+      "base_vre": 200,
+      "vre_regen_per_sec": 11.2,
+      "movement_speed_ms": 2.9,
+      "crit_chance_base_pct": 5.0
+    },
+    "entropy_warden": {
+      "base_hp": 950,
+      "base_shield": 500,
+      "base_vre": 220,
+      "vre_regen_per_sec": 10.5,
+      "movement_speed_ms": 3.0,
+      "crit_chance_base_pct": 5.0
+    }
+  },
+  "factions": {
+    "voidborn_conclave": {
+      "leader": "Elder Cassian Rhae",
+      "vre_cost_reduction_pct": 8.0,
+      "cascade_threshold_bonus": 0.1,
+      "void_rift_xp_bonus_pct": 12.0,
+      "unique_ability": "void_communion",
+      "void_communion_radius_meters": 3.7,
+      "void_communion_aggression_reduction_pct": 22.0,
+      "void_communion_suppressed_at_entropy": 0.6
+    },
+    "iron_sovereignty": {
+      "leader": "Marshal Drek Volhari",
+      "weapon_damage_bonus_pct": 6.0,
+      "shield_bonus_flat": 340,
+      "crit_chance_bonus_pct": 2.3,
+      "unique_ability": "iron_volley",
+      "iron_volley_rounds": 7,
+      "iron_volley_damage_per_round_pct": 47.0,
+      "iron_volley_vre_cost": 0,
+      "iron_volley_cooldown_seconds": 12.0
+    },
+    "the_fractured": {
+      "leader": "Phantom \"Null\" Osei",
+      "movement_speed_bonus_pct": 8.0,
+      "stealth_duration_bonus_pct": 40.0,
+      "vre_generation_bonus_pct": 11.0,
+      "cascade_threshold_penalty": -0.1,
+      "unique_ability": "phase_slip",
+      "phase_slip_invulnerability_seconds": 0.8,
+      "phase_slip_vre_cost": 37,
+      "phase_slip_cooldown_seconds": 37.0
+    }
+  },
+  "enemies": {
+    "drifter": {
+      "type": "ve_type_1",
+      "base_hp": 840,
+      "base_shield": 0,
+      "movement_speed_ms": 2.1,
+      "aggression_vrf_threshold": 0.95,
+      "entropy_adaptation": {
+        "0.2": ["gains_ranged_attack"]
+      }
+    },
+    "warden": {
+      "type": "ve_type_2",
+      "base_hp": 4200,
+      "base_shield": 1100,
+      "movement_speed_ms": 1.8,
+      "aggression_vrf_threshold": 0.0,
+      "entropy_adaptation": {
+        "0.5": ["spawns_drifter_on_50pct_hp"]
+      }
+    },
+    "cascader": {
+      "type": "ve_type_3",
+      "base_hp": 9800,
+      "base_shield": 0,
+      "damage_reduction_pct": 60.0,
+      "movement_speed_ms": 2.8,
+      "aggression_vrf_threshold": 0.0,
+      "void_pulse_radius_meters": 18.5,
+      "void_pulse_damage": 840,
+      "entropy_adaptation": {
+        "0.7": ["void_pulse_radius_increases_to_24.2m"]
+      }
+    },
+    "null_drifter": {
+      "type": "ve_type_1_variant",
+      "introduced_patch": "1.3.0",
+      "base_hp": 920,
+      "base_shield": 0,
+      "movement_speed_ms": 2.3,
+      "damage_types": ["void", "neural"],
+      "aggression_vrf_threshold": 0.95,
+      "zone_exclusive": "the_null_web"
+    },
+    "void_whisperer": {
+      "type": "ve_type_2_variant",
+      "introduced_patch": "1.2.0",
+      "base_hp": 3800,
+      "base_shield": 800,
+      "movement_speed_ms": 1.6,
+      "aggression_default": false,
+      "aggression_trigger": "player_uses_void_damage_within_8m",
+      "zone_exclusive": "the_communion_spire"
+    },
+    "void_breacher": {
+      "type": "ve_type_1_modified",
+      "introduced_patch": "1.1.0",
+      "base_hp": 1100,
+      "base_shield": 300,
+      "movement_speed_ms": 2.5,
+      "damage_types": ["kinetic", "void"],
+      "zone_exclusive": "the_forgeheart"
+    }
+  },
+  "architects": {
+    "null_form_theta": {
+      "zone": "the_first_unraveling",
+      "base_hp": 47000,
+      "damage_type": "void",
+      "phase_thresholds_pct": [75, 50, 25],
+      "phase_2_ability": "void_shield",
+      "phase_3_ability": "cascade_burst",
+      "entropy_form_threshold": 0.5,
+      "loot_table": {
+        "architect_token_guaranteed": true,
+        "unique_drop_id": null,
+        "unique_drop_chance_pct": 0.0
+      }
+    },
+    "elder_warform_theta_9": {
+      "zone": "communion_spire",
+      "base_hp": 128400,
+      "damage_type": "void",
+      "phase_thresholds_pct": [75, 50, 25],
+      "phase_2_ability": "entropy_surge",
+      "phase_2_entropy_spike": 0.40,
+      "phase_2_communion_buffer_spike": 0.22,
+      "phase_2_trigger_pct_with_communion": 40,
+      "phase_3_ability": "rift_rend",
+      "phase_3_mini_rifts": 7,
+      "phase_3_vrf_per_rift": 0.1,
+      "entropy_form_threshold": 0.5,
+      "loot_table": {
+        "architect_token_guaranteed": true,
+        "unique_drop_id": "rhae_codex_audio",
+        "unique_drop_chance_pct": 3.7
+      }
+    },
+    "the_hollow_king": {
+      "zone": "the_null_web",
+      "base_hp": 184200,
+      "damage_type": "void",
+      "hp_regen_per_second": 840,
+      "phase_thresholds_pct": [75, 50, 25],
+      "phase_2_ability": "fracture_wave",
+      "phase_2_wave_count": 7,
+      "phase_2_wave_damage_pct_weapon": 47.0,
+      "phase_3_ability": "null_collapse",
+      "phase_3_vrf_spike": 2.4,
+      "phase_3_duration_seconds": 14,
+      "phase_3_void_damage_bonus_pct": 40,
+      "phase_3_cooldown_seconds": 55.0,
+      "entropy_form_threshold": 0.5,
+      "loot_table": {
+        "architect_token_guaranteed": true,
+        "unique_drop_id": "null_cipher_log",
+        "unique_drop_chance_pct": 3.7
+      }
+    },
+    "warform_prime": {
+      "zone": "the_forgeheart",
+      "base_hp": 96800,
+      "damage_type": "kinetic",
+      "target_priority": "highest_shield",
+      "retarget_interval_seconds": 4.7,
+      "phase_thresholds_pct": [75, 50, 25],
+      "phase_2_ability": "iron_shell",
+      "phase_2_shield_kinetic_absorption": 12000,
+      "phase_3_ability": "kinetic_resonance",
+      "entropy_form_threshold": 0.5,
+      "loot_table": {
+        "architect_token_guaranteed": true,
+        "unique_drop_id": "volharis_burden_audio",
+        "unique_drop_chance_pct": 3.7
+      }
+    },
+    "the_undivided": {
+      "zone": "shattered_belt_node_7",
+      "base_hp": 247000,
+      "damage_type": "void",
+      "phase_thresholds_pct": [75, 50, 25],
+      "phase_2_ability": "split_form",
+      "phase_2_copies_spawned": 2,
+      "phase_2_copy_hp_pct": 30,
+      "phase_3_ability": "merge_strike",
+      "entropy_form_threshold": 0.5,
+      "loot_table": {
+        "architect_token_guaranteed": true,
+        "unique_drop_id": "shattered_belt_codex",
+        "unique_drop_chance_pct": 3.7
+      }
+    },
+    "cascade_sovereign": {
+      "zone": "northern_ruin",
+      "base_hp": 312000,
+      "damage_type": "void",
+      "phase_thresholds_pct": [75, 50, 25],
+      "phase_2_ability": "entropy_storm",
+      "phase_3_ability": "ascendant_form",
+      "entropy_form_threshold": 0.5,
+      "loot_table": {
+        "architect_token_guaranteed": true,
+        "unique_drop_id": "sovereign_core",
+        "unique_drop_chance_pct": 3.7
+      }
+    }
+  },
+  "zones": {
+    "new_amora_station_concourse": {"vrf_base": 0.8847, "edr_multiplier": 0.0, "combat_enabled": false},
+    "new_amora_station_resonance_chamber": {"vrf_base": 1.12, "edr_multiplier": 0.5, "access_restricted": true},
+    "kedraxis_vorak": {"vrf_base": 0.91, "edr_multiplier": 1.0},
+    "kedraxis_northern_ruin": {"vrf_base": 1.80, "vrf_max": 2.40, "edr_multiplier": 1.8},
+    "shattered_belt_outer": {"vrf_base": 0.62, "edr_multiplier": 0.8},
+    "shattered_belt_rift_nodes": {"vrf_base": 2.10, "vrf_max": 2.40, "edr_multiplier": 2.0},
+    "void_rift_interior": {"vrf_base": 1.47, "edr_multiplier": 2.0, "edr_override": 0.0674},
+    "the_forgeheart": {"vrf_base": 1.03, "edr_multiplier": 1.0},
+    "the_communion_spire": {"vrf_base": 0.97, "edr_multiplier": 1.0},
+    "the_null_web": {"vrf_base": 1.18, "edr_multiplier": 1.2}
+  },
+  "gear_tiers": {
+    "1": {"name": "standard", "color": "gray", "drop_rate_pct": 60.0, "vrf_bonus_min": 0.00, "vrf_bonus_max": 0.02},
+    "2": {"name": "refined", "color": "green", "drop_rate_pct": 25.0, "vrf_bonus_min": 0.02, "vrf_bonus_max": 0.06},
+    "3": {"name": "augmented", "color": "blue", "drop_rate_pct": 10.0, "vrf_bonus_min": 0.06, "vrf_bonus_max": 0.12},
+    "4": {"name": "void_touched", "color": "purple", "drop_rate_pct": 4.0, "vrf_bonus_min": 0.12, "vrf_bonus_max": 0.22},
+    "5": {"name": "architect_forged", "color": "gold", "drop_rate_pct": 1.0, "vrf_bonus_min": 0.22, "vrf_bonus_max": 0.40}
+  },
+  "resonance_affinity_bonus_pct": 14.7,
+  "void_mastery_milestones": {
+    "10000": {"bonus": "vrf_generation_pct", "value": 5.0},
+    "25000": {"bonus": "resonance_crystal_slot", "value": 1},
+    "50000": {"bonus": "edr_reduction_per_tick", "value": 0.0042},
+    "100000": {"bonus": "title", "value": "void_veteran"},
+    "250000": {"bonus": "transmutation_unlock", "value": true}
+  },
+  "faction_ranks": {
+    "1": {"name_conclave": "Initiate", "name_iron": "Initiate", "name_fractured": "Initiate", "rep_required": 0},
+    "2": {"name_conclave": "Adept", "name_iron": "Adept", "name_fractured": "Adept", "rep_required": 500},
+    "3": {"name_conclave": "Vanguard", "name_iron": "Vanguard", "name_fractured": "Vanguard", "rep_required": 1500},
+    "4": {"name_conclave": "Sentinel", "name_iron": "Sentinel", "name_fractured": "Sentinel", "rep_required": 3500},
+    "5": {"name_conclave": "Champion", "name_iron": "Champion", "name_fractured": "Champion", "rep_required": 7000},
+    "6": {"name_conclave": "Architect", "name_iron": "Architect", "name_fractured": "Architect", "rep_required": 12000},
+    "7": {"name_conclave": "Warden", "name_iron": "Warden", "name_fractured": "Warden", "rep_required": 20000},
+    "8": {"name_conclave": "Elder", "name_iron": "Marshal", "name_fractured": "Phantom", "rep_required": 32000},
+    "9": {"name_conclave": "Chosen", "name_iron": "Chosen", "name_fractured": "Chosen", "rep_required": 50000},
+    "10": {"name_conclave": "Paragon", "name_iron": "Paragon", "name_fractured": "Paragon", "rep_required": 75000}
+  },
+  "status_effects": {
+    "void_burn": {"duration_seconds": 8.4, "damage_per_second": 37, "damage_type": "void"},
+    "entropy_stun": {"duration_seconds": 1.4, "effect": "no_movement_or_abilities"},
+    "void_marked": {"duration_seconds": 12, "damage_amplification_pct": 40, "damage_type": "void"},
+    "entropy_slow": {"duration_seconds": 6, "movement_reduction_pct": 60, "attack_rate_reduction_pct": 40},
+    "fractured_armor": {"duration_seconds": 10, "armor_reduction_pct": 47},
+    "cascade_resistant": {"duration_seconds": 20, "cascade_immune": true, "vrf_generation_multiplier": 0.5},
+    "phase_shift": {"invulnerability_partial": true, "min_duration_seconds": 0.8, "max_duration_seconds": 2.4}
+  },
+  "pvp": {
+    "breach_wars_team_size": 6,
+    "faction_conquest_team_size": 12,
+    "faction_standings_update_interval_hours": 6,
+    "faction_betrayal_reputation_penalty_days": 30,
+    "max_faction_server_control_pct_alert": 45.0
+  },
+  "server": {
+    "api_port": 51847,
+    "combat_tick_rate_hz": 64,
+    "session_timeout_idle_seconds": 1847,
+    "db_connection_pool_max": 37,
+    "client_vrf_desync_threshold": 0.05,
+    "vrf_client_update_rate_hz": 10,
+    "position_validation_rate_hz": 20,
+    "rate_limit_requests_per_minute": 1337,
+    "regions": ["na_west", "na_east", "eu_west", "eu_east", "apac", "sa"]
+  }
+}

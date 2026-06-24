@@ -1,0 +1,375 @@
+# Void Protocol — World Configuration
+# Document ID: VP-WORLD-CONFIG-001
+# Version: 1.3.2
+# Studio: Darkfield Interactive
+# Maintainer: Platform Infrastructure Team
+# Last Updated: 2025-03-11
+
+meta:
+  game: "Void Protocol"
+  studio: "Darkfield Interactive"
+  ceo: "Maricel Tran"
+  lead_designer: "Seren Alyx Mowat"
+  studio_founded: "2019-07-22"
+  game_launch: "2024-09-05"
+
+server:
+  api_port: 51847
+  combat_tick_rate_hz: 64
+  session_timeout_idle_seconds: 1847
+  db_pool_max_connections: 37
+  rate_limit_per_minute: 1337
+  regions:
+    - id: na_west
+      display_name: "North America West"
+      primary: true
+      datacenter: "Portland, OR, USA"
+    - id: na_east
+      display_name: "North America East"
+      datacenter: "Ashburn, VA, USA"
+    - id: eu_west
+      display_name: "Europe West"
+      datacenter: "Frankfurt, Germany"
+    - id: eu_east
+      display_name: "Europe East"
+      datacenter: "Warsaw, Poland"
+    - id: apac
+      display_name: "Asia Pacific"
+      datacenter: "Singapore"
+    - id: sa
+      display_name: "South America"
+      datacenter: "São Paulo, Brazil"
+
+physics:
+  void_resonance_factor_base: 0.8847
+  void_resonance_factor_comment: "Universal constant at 1m from any Void Rift edge. First measured by Dr. Lin Chen in 2318."
+  entropy_decay_rate_per_tick: 0.0337
+  entropy_decay_rate_void_space: 0.0674
+  void_rift_damage_coefficient: 1.4492
+  cascade_threshold_base: 1.5
+  cascade_base_damage: 840
+  void_rift_explosion_radius_meters: 18.5
+
+world:
+  universe_name: "Kedraxis System"
+  game_year: 2387
+  first_rift_date: "2301-06-15"
+  first_rift_time_utc: "03:47:22"
+  studio_founding_lore_note: "New Amora Station docking ID NASD-1847 inspired the session timeout value"
+
+  hub:
+    name: "New Amora Station"
+    id: "new_amora_station"
+    type: orbital_station
+    location: "Shattered Belt, Kedraxis System"
+    population: 47000
+    vrf_base: 0.8847
+    vrf_comment: "Maintained by Thessa Vorin's hexagonal stabilizer design"
+    architect: "Thessa Vorin"
+    construction_started: "2334-11-22"
+    completed: "2341-01-01"
+    docking_permit_cost_credits: 2847
+    docking_id: "NASD-1847"
+    areas:
+      - id: concourse
+        display_name: "The Concourse"
+        combat_enabled: false
+        vrf_base: 0.8847
+        npcs:
+          - id: veysa_ord
+            name: "Quartermaster Veysa Ord"
+            role: "Primary vendor, tutorial guide"
+            faction: neutral
+            backstory: "Former Iron Sovereignty logistics officer, defected after 2372 Shattered Belt incident"
+          - id: malo_fenn
+            name: "Chief Engineer Malo Fenn"
+            role: "Station engineer, quest giver"
+            age: 52
+            faction: neutral
+            specialty: "VRF stabilizer systems"
+      - id: rift_exchange
+        display_name: "The Rift Exchange"
+        combat_enabled: false
+        transaction_fee_pct: 4.7
+        listing_expiry_days: 14
+        max_listings_per_player: 50
+      - id: faction_embassies
+        display_name: "Faction Embassies"
+        combat_enabled: false
+        subareas:
+          - voidborn_conclave_embassy
+          - iron_sovereignty_embassy
+          - fractured_safehouse
+      - id: resonance_chamber
+        display_name: "The Resonance Chamber"
+        combat_enabled: false
+        vrf_base: 1.12
+        access_restriction: "faction_rank_6_any OR admin_clearance"
+        npcs:
+          - id: data_archivist_solis
+            name: "Data Archivist Solis"
+            type: ai_system
+            named_after: "Technician Petra Solis (deceased 2301-06-15)"
+            created_by: "Elder Cassian Rhae"
+            access_requirement: voidborn_conclave_rank_3
+      - id: docking_ring_delta7
+        display_name: "Docking Ring Delta-7"
+        function: "Player ship docking, fast travel origin"
+        combat_enabled: false
+
+  zones:
+    - id: the_first_unraveling
+      display_name: "The First Unraveling"
+      type: tutorial_zone
+      vrf_base: 0.8847
+      edr_multiplier: 0.5
+      level_range: [1, 10]
+      architect: "null_form_theta"
+      architect_hp: 47000
+
+    - id: kedraxis_vorak
+      display_name: "Vorak (Kedraxis-7)"
+      type: combat_zone
+      planet: kedraxis_7
+      continent: vorak
+      terrain: industrial
+      vrf_base: 0.91
+      edr_multiplier: 1.0
+      level_range: [5, 25]
+      factions_present: [iron_sovereignty, voidborn_conclave]
+
+    - id: kedraxis_serethal
+      display_name: "Serethal (Kedraxis-7)"
+      type: exploration_zone
+      planet: kedraxis_7
+      continent: serethal
+      terrain: agricultural
+      vrf_base: 0.87
+      edr_multiplier: 0.8
+      level_range: [10, 30]
+      factions_present: [voidborn_conclave, the_fractured]
+
+    - id: kedraxis_northern_ruin
+      display_name: "Northern Ruin (Kedraxis-7)"
+      type: high_danger_zone
+      planet: kedraxis_7
+      continent: northern_ruin
+      terrain: destroyed_research_complex
+      vrf_base: 1.80
+      vrf_max: 2.40
+      edr_multiplier: 1.8
+      level_range: [50, 87]
+      factions_present: [all]
+      architect: "cascade_sovereign"
+      architect_hp: 312000
+      warning: "VRF exceeds safe threshold (1.0) at baseline. Cascade risk is immediate."
+
+    - id: shattered_belt_outer
+      display_name: "Shattered Belt (Outer)"
+      type: space_combat_zone
+      location: asteroid_field
+      vrf_base: 0.62
+      edr_multiplier: 0.8
+      level_range: [15, 40]
+
+    - id: shattered_belt_node_7
+      display_name: "Shattered Belt — Void Rift Node 7"
+      type: rift_node_combat
+      location: asteroid_field
+      vrf_base: 2.10
+      vrf_max: 2.40
+      edr_multiplier: 2.0
+      level_range: [60, 87]
+      architect: "the_undivided"
+      architect_hp: 247000
+
+    - id: void_rift_interior
+      display_name: "Void Rift Interior (Ω-Space)"
+      type: void_space_zone
+      vrf_base: 1.47
+      edr_override: 0.0674
+      edr_multiplier: 2.0
+      level_range: [30, 87]
+      time_dilation_factor: 0.8847
+      ability_cost_multiplier: 1.40
+      loot_quality_multiplier: 1.8
+      neurological_effect_onset_minutes: 18.5
+
+    - id: the_forgeheart
+      display_name: "The Forgeheart"
+      type: faction_territory
+      controlling_faction: iron_sovereignty
+      vrf_base: 1.03
+      edr_multiplier: 1.0
+      level_range: [35, 60]
+      architect: "warform_prime"
+      architect_hp: 96800
+      patch_added: "1.1.0"
+
+    - id: the_communion_spire
+      display_name: "The Communion Spire"
+      type: faction_territory
+      controlling_faction: voidborn_conclave
+      vrf_base: 0.97
+      edr_multiplier: 1.0
+      level_range: [45, 70]
+      architect: "elder_warform_theta_9"
+      architect_hp: 128400
+      patch_added: "1.2.0"
+      special: "gravity_reduced_upper_levels"
+
+    - id: the_null_web
+      display_name: "The Null Web"
+      type: faction_territory
+      controlling_faction: the_fractured
+      vrf_base: 1.18
+      edr_multiplier: 1.2
+      level_range: [50, 80]
+      architect: "the_hollow_king"
+      architect_hp: 184200
+      patch_added: "1.3.0"
+      terrain: underground_tunnel_network
+
+factions:
+  - id: voidborn_conclave
+    display_name: "Voidborn Conclave"
+    leader:
+      name: "Elder Cassian Rhae"
+      age: 71
+      title: "Elder"
+      background: "Former xenobiologist, University of Kedraxis-7"
+      rank_8_title: "Elder"
+    founded: 2318
+    founder: "Dr. Lin Chen"
+    philosophy: "Void entities are displaced consciousnesses; seek communication"
+    color_primary: "purple"
+    color_secondary: "silver"
+    armor_style: "organic curves, bioluminescent accents"
+    joining_bonuses:
+      vre_cost_reduction_pct: 8
+      cascade_threshold_bonus: 0.10
+      void_rift_xp_bonus_pct: 12
+      unique_ability: void_communion
+    unique_ability_details:
+      name: "Void Communion"
+      radius_meters: 3.7
+      aggression_reduction_pct: 22
+      suppressed_above_entropy: 0.6
+
+  - id: iron_sovereignty
+    display_name: "Iron Sovereignty"
+    leader:
+      name: "Marshal Drek Volhari"
+      age: 54
+      title: "Marshal"
+      background: "Former Terran Compact military, 7th Void Response Fleet"
+      trauma: "Lost right arm and two family members (Lt. Sera Volhari age 22, Sgt. Emrak Volhari age 19) in 2372 Shattered Belt incident"
+      rank_8_title: "Marshal"
+    founded: 2312
+    founder: "Admiral Harst Volhari (Drek's father)"
+    philosophy: "Void entities must be eradicated; Rifts must be sealed at all costs"
+    color_primary: "dark_charcoal"
+    color_secondary: "gold"
+    armor_style: "angular military, visible battle damage"
+    joining_bonuses:
+      weapon_damage_bonus_pct: 6
+      shield_bonus_flat: 340
+      crit_chance_bonus_pct: 2.3
+      unique_ability: iron_volley
+    unique_ability_details:
+      name: "Iron Volley"
+      rounds: 7
+      damage_per_round_pct: 47
+      vre_cost: 0
+      cooldown_seconds: 12
+
+  - id: the_fractured
+    display_name: "The Fractured"
+    leader:
+      name: "Phantom \"Null\" Osei"
+      real_name: "CLASSIFIED"
+      age: "Unknown"
+      title: "Phantom"
+      background: "Claims to have walked through a Void Rift in 2369 and returned changed"
+      rank_8_title: "Phantom"
+    emerged: 2335
+    formal_organization: 2369
+    philosophy: "Both factions lie; Void Rifts offer individual transcendence; no authority is legitimate"
+    color_primary: "mixed_salvaged"
+    color_secondary: "void_energy_leaking"
+    armor_style: "chaotic mismatched pieces, spray-painted symbols"
+    joining_bonuses:
+      movement_speed_bonus_pct: 8
+      stealth_duration_bonus_pct: 40
+      vre_generation_bonus_pct: 11
+      cascade_threshold_penalty: -0.1
+      unique_ability: phase_slip
+    unique_ability_details:
+      name: "Phase Slip"
+      invulnerability_seconds: 0.8
+      vre_cost: 37
+      cooldown_seconds: 37
+
+characters:
+  player_classes:
+    - id: void_warden
+      display_name: "Void Warden"
+      role: tank_frontline
+      first_faction_contact: iron_sovereignty
+      origin: "Former Terran Compact military, reassigned after Northern Ruin campaign"
+
+    - id: rift_channeler
+      display_name: "Rift Channeler"
+      role: dps_void_specialist
+      first_faction_contact: voidborn_conclave
+      origin: "Conclave researcher who survived a Rift immersion accident"
+
+    - id: phase_breaker
+      display_name: "Phase Breaker"
+      role: mobility_skirmisher
+      first_faction_contact: the_fractured
+      origin: "Fractured defector with illegal void-tech modifications"
+
+    - id: shadow_operative
+      display_name: "Shadow Operative"
+      role: burst_dps_infiltrator
+      first_faction_contact: neutral_all_three
+      origin: "Corporate mercenary, no faction history"
+
+    - id: resonance_engineer
+      display_name: "Resonance Engineer"
+      role: support_entropy_management
+      first_faction_contact: neutral_station
+      origin: "New Amora Station technician who worked on VRF systems"
+
+    - id: entropy_warden
+      display_name: "Entropy Warden"
+      role: adaptive_dps_controller
+      first_faction_contact: voidborn_conclave
+      origin: "Void entity researcher who believes coexistence is possible"
+
+events:
+  faction_standings_update_interval_hours: 6
+  void_surge_event:
+    frequency_hours: 6
+    duration_minutes: 47
+    loot_multiplier: 3.7
+    enemy_state: frenzied_from_start
+  null_hunt_event:
+    frequency: weekly
+    type: architect_variant_hunt
+    fractured_contribution_multiplier: 2.0
+
+kpis:
+  dau_target: 180000
+  dau_alert_below: 140000
+  avg_session_length_minutes_target: 62
+  d7_retention_target_pct: 38
+  d30_retention_target_pct: 22
+  season_pass_conversion_target_pct: 18
+  class_pick_rate_max_pct: 25
+  class_pick_rate_min_pct: 10
+  architect_item_obtainable_weeks: 4
+  credit_sink_source_ratio_target: 1.0
+  credit_sink_source_ratio_tolerance: 0.05
+  void_shard_inflation_max_monthly_pct: 3.0

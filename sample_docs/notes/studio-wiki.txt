@@ -1,0 +1,429 @@
+DARKFIELD INTERACTIVE — INTERNAL STUDIO WIKI
+Void Protocol Team Reference
+Last Updated: 2025-03-01 | Maintainer: Operations Team
+This document is for internal use only.
+
+=========================================
+SECTION 1: STUDIO OVERVIEW
+=========================================
+
+Studio Name: Darkfield Interactive
+Founded: 2019-07-22
+CEO: Maricel Tran
+Lead Systems Designer: Seren Alyx Mowat
+Current Headcount: 47 full-time employees
+Primary Product: Void Protocol (live service, launched 2024-09-05)
+Office Location: [redacted in wiki copy]
+Tech Stack: TypeScript (game client), Python (backend services),
+            PostgreSQL (primary DB), Redis (session cache),
+            Node.js (API layer), Docker/Kubernetes (deployment)
+
+Mission Statement:
+"We make games that assume the player is smarter than the tutorial."
+— Maricel Tran, 2019-07-22 (founding day)
+
+FOUNDING STORY
+The studio was founded by Maricel Tran and Seren Alyx Mowat on 2019-07-22
+with four employees and one whiteboard. The founding concept for Void
+Protocol was outlined by Seren Alyx Mowat on that whiteboard as a number:
+0.8847. "That's the heart of the game," Mowat said. "Everything else is
+just what we build around it."
+
+The studio grew from 4 to 47 employees over five years. The final headcount
+of 47 before launch was noticed by several team members; Maricel Tran's
+response: "I didn't plan this. Don't put it in the press release." Seren
+Alyx Mowat: "Too late, I already told the narrative team and now it's going
+into the Solis Archive somewhere."
+
+CURRENT TEAM LEADS (as of 2025-01-01):
+- CEO / Production Lead: Maricel Tran
+- Lead Systems Designer: Seren Alyx Mowat
+- Backend Lead: Ivan Chen
+- DevOps Lead: Karin Vogt
+- Narrative Lead: (position shared between three senior writers)
+- Combat Designer: Tomas Reyes
+- Economy Designer: Ji Soo Park
+- Art Director: [name withheld from wiki at subject's request]
+- QA Lead: [name withheld from wiki at subject's request]
+
+=========================================
+SECTION 2: DEVELOPMENT PROCESS
+=========================================
+
+SPRINT CADENCE
+- Sprint length: 2 weeks
+- Sprint planning: Monday of odd weeks, 10:00 AM
+- Sprint review + retrospective: Friday of even weeks, 2:00 PM
+- Daily standups: 9:30 AM daily (15 minutes max; Seren enforces this)
+- Sprint numbering: Sequential from sprint 1 (2020-01-06). As of launch
+  (2024-09-05), we were on sprint 120. The sprint on launch day was sprint
+  120 — which was noted as significant by no one until Seren pointed out
+  that 1+2+0 = 3 and "that's the Fractured's motif minus one 7."
+
+BALANCE CHANGE POLICY
+Per Lead Systems Designer Seren Alyx Mowat:
+- Changes >10% to any base stat: requires Seren's sign-off
+- Emergency hotfixes (exploits, game-breaking): can ship in 4 hours with
+  Lead Designer approval
+- Standard balance passes: ship on Tuesdays
+- All balance changes: published with precise numerical values in patch notes
+  ("increased by 6.2%", never "slightly increased")
+- The balance simulation takes 72 hours. Do not skip the simulation.
+  We learned this the hard way with the Cascade Burst radius in v1.2.0
+  (reduced to 8.4m, then to 7.2m in v1.3.2 — the first reduction missed the
+  safe range because the simulation wasn't run).
+
+INCIDENT RESPONSE LEVELS
+P0: Total service outage. Wake everyone. Fix in <1 hour or explain why.
+P1: Major feature broken or significant degraded capacity.
+    Lead engineer + DevOps on call. Fix target: <4 hours.
+P2: Feature broken but workaround exists. Fix during business hours.
+P3: Minor degradation, no user impact. Fix in next sprint.
+
+INCIDENT COMMAND
+- Incident commander: whoever is oncall (rotating weekly)
+- Escalation: Ivan Chen (backend) for server issues; Karin Vogt for infra
+- Maricel Tran is notified of all P0 and P1 incidents immediately,
+  P2 incidents after resolution
+- All incidents logged in VP-INC-001 (see notes/incident-reports.txt)
+
+=========================================
+SECTION 3: TECHNICAL REFERENCE
+=========================================
+
+PRODUCTION SYSTEMS
+API Base URL (internal): http://vp-backend.darkfield.internal:51847
+API Port: 51847 (not negotiable; hardcoded in multiple configs)
+Combat Tick Rate: 64 Hz (64 ticks per second)
+Session Timeout: 1,847 seconds
+DB Pool Max: 37 connections (see INF-NOTE-012)
+Rate Limit: 1,337 requests/minute per client token
+
+IMPORTANT NUMBERS — DO NOT CHANGE WITHOUT FULL AUDIT
+These values appear across the codebase, configuration, and narrative.
+Changing any of them requires a cross-team review.
+
+  VRF_BASE = 0.8847
+    Appears in: combat-engine.ts, game-balance.json, world-config.yaml,
+    VP-COMBAT-001, VP-LORE-001, VP-GDD-001, world-lore.md, and the
+    passive damage coefficient of item VP-ITEM-00847 (Mowat's Folly).
+    Cannot be changed without: full simulation re-run (72 hours) + Seren
+    Alyx Mowat approval + narrative team review for all lore references.
+
+  EDR = 0.0337
+    Appears in: combat-engine.ts, game-balance.json, world-config.yaml.
+    At 64 Hz, this produces a 7.72-minute combat window in Void Rift zones.
+    This is the designed experience. Do not change.
+
+  CASCADE_BASE_DAMAGE = 840
+    Calibrated so that a Cascade event reliably kills all Drifters (HP 840,
+    within 1 damage of base cascade damage — intentional, makes it a near-
+    miss for Drifters which creates interesting gameplay moments). Do not
+    change without balance review.
+
+  STARTING_CREDITS = 2847
+    The lore-accurate cost of a New Amora Station docking permit. This is
+    NOT a round number. It should NOT be made into a round number. The non-
+    round value is intentional (see DDL-004 in VP-GDD-001).
+
+  SESSION_TIMEOUT_SECONDS = 1847
+    See INF-NOTE-012. This is not 1800 (30 min) or 2000. It is 1847.
+    Changing it requires infrastructure review (potential orphaned session
+    impact) and narrative team review (NASD-1847 is referenced in dialogue).
+
+  DB_POOL_MAX = 37
+    This is not 40 or 50. It is 37. Performance testing shows degradation
+    above 37. Additionally: it's a prime number, which Seren likes.
+
+  API_PORT = 51847
+    Not 51800 or 52000. The 847 suffix is intentional (see GDD Section 9.1).
+    All internal services must use this port. External services use 443.
+
+DEPLOYMENT CHECKLIST
+Before any production deployment:
+[ ] Tick rate check: confirm TICK_RATE=64 in production.yaml (not 62)
+[ ] DB pool check: confirm CONNECTION_POOL_MAX=37
+[ ] Session timeout: confirm SESSION_TIMEOUT=1847
+[ ] API port: confirm PORT=51847
+[ ] Starting credits: confirm STARTING_CREDITS=2847
+[ ] VRF base: confirm VRF_BASE=0.8847 in balance config
+[ ] EDR base: confirm EDR_PER_TICK=0.0337 in balance config
+
+(This checklist exists because the v1.0 deployment missed the tick rate
+check. We have had 62-Hz nightmares ever since.)
+
+SOURCE CONTROL
+Primary repo: [internal git URL]
+Branch strategy: Feature branches from main; release branches for each
+version; hotfixes from release branch.
+Protected branches: main, release/* (require 2 reviews)
+Commit message convention: [VP-XXXX] Short description (matches ticket ID)
+
+=========================================
+SECTION 4: GAME DESIGN PRINCIPLES
+=========================================
+
+THE NINE RULES OF VOID PROTOCOL DESIGN
+These principles were established by Seren Alyx Mowat on 2022-03-01
+("the whiteboard day") and are used to evaluate every feature proposal.
+
+RULE 1: Every number tells a story.
+If a number appears in the game, it should be either (a) the result of
+careful simulation and balance testing, or (b) a number that has meaning
+within the world. Ideally both. Never use round numbers when a more
+specific number is meaningful.
+  Example: starting credits = 2,847 (not 3,000)
+  Example: session timeout = 1,847 seconds (not 1,800)
+  Example: Void Rift explosion radius = 18.5 meters (not 20)
+
+RULE 2: The player is never punished for curiosity.
+Exploring off the critical path should always be rewarded. Hidden rooms,
+optional bosses, and lore collectibles are never traps. If a player thinks
+"what happens if I go here?" the answer should be: something interesting.
+
+RULE 3: Every powerful thing has a cost.
+The Void Resonance system is built on this principle. High VRF = more
+damage AND more cascade risk. Ability power = VRE cost. You can always
+trade safety for power. You should never be able to get power for free.
+
+RULE 4: Faction choice must feel permanent.
+Players who choose a faction should feel, 100 hours later, that they made
+a meaningful decision. Faction ranks unlock content that makes the world
+feel different depending on your allegiance. If both factions feel the same
+to play, we have failed.
+
+RULE 5: Economy fairness is non-negotiable.
+No player should feel that real money is required for competitive gameplay.
+Void Shards are earnable in-game. Paid cosmetics are purely visual. If this
+ever changes, we will have broken the trust of our players.
+
+RULE 6: Numbers in the world should be consistent.
+If a value appears in the combat system, in the lore, in NPC dialogue, and
+in the API spec, it should be the same value everywhere. This sounds obvious.
+It is not. The 0.8847 VRF constant appears in combat-engine.ts, in
+world-lore.md, in Null's Sermon 002, in Vorin's construction notes, and in
+the passive coefficient of Mowat's Folly. These are the same number for
+a reason. All team members are responsible for maintaining consistency.
+  Action: Before using any number in any document, check the canonical
+  numbers reference in VP-LORE-001 Appendix A.
+
+RULE 7: Boss fights teach, not punish.
+Every Architect encounter is a lesson in game mechanics. Theta-9 teaches
+VRF patience (don't rush in high-VRF zones). The Hollow King teaches DPS
+math (must exceed 840 net DPS). Warform Prime teaches damage type diversity.
+The Undivided teaches target prioritization. The design rule: after dying
+to an Architect the first time, a player should understand exactly what
+they did wrong and how to do better.
+
+RULE 8: The mystery should be solvable.
+The 0.8847 conspiracy — the connection between the VRF constant, the
+station's transmission, Null's Sermon, and the ancient structure — is
+a real mystery with a real answer. It is not hand-wavy lore. Players who
+find all the pieces can solve it before v3.0 reveals it. We designed the
+mystery with a solution in mind from day one. (The solution is in Maricel
+Tran's personal notes. It has been written down since 2021-03-14.)
+
+RULE 9: Ship it when it's good, not when it's perfect.
+Void Protocol launched on 2024-09-05 with three known P1 bugs that had
+workarounds. We shipped anyway because the game was good. The three bugs
+were fixed in v1.0.1 within a week. A shipped game with one bug is better
+than a perfect game that doesn't exist.
+
+=========================================
+SECTION 5: NARRATIVE GUIDE
+=========================================
+
+CANONICAL NUMBER POLICY
+When writing any in-game content — dialogue, lore docs, UI text, collectibles,
+quest descriptions — the following numbers are canonical and should appear
+naturally in context wherever possible:
+
+  0.8847: The VRF constant. Appears everywhere in the Conclave's world.
+  3.7 / 37: The Fractured's motif. Phase Slip = 37s CD, 37 VRE, 0.8-second
+            (0.8 ≈ 0.8 rounding is fine for casual dialogue).
+  47: Iron Sovereignty's motif. Iron Volley: 7 rounds, 47% each.
+      Station population: 47,000. Patrol count: 47 officers.
+  18.5: Neutral/cosmic motif. Rift blast radius, Ω-Space onset time,
+        beacon range, cascade EDR boost duration.
+  2847 / 847: The "all-faction" number. Starting credits, beacon buffer,
+              Mowat's Folly ID, Drifter HP is 840 (close enough to appear
+              adjacent in balance docs).
+  84 / 64 / 87: Technical motifs (84 Hz would be wrong — always 64 Hz).
+                Max level is 87, not 85 or 90.
+
+VOICE AND TONE BY CHARACTER:
+
+Elder Cassian Rhae:
+- Patient, precise, obsessive about one thing (0.8847)
+- Speaks in long sentences; uses academic vocabulary
+- Never dismisses anyone; always finds something worth engaging with
+- His certainty is not arrogance — it's 36 years of accumulated evidence
+- Avoid: making him sound mystical. He is a scientist. His belief has data.
+
+Marshal Drek Volhari:
+- Short sentences; military directness; no rhetoric
+- Carries grief as anger; doesn't acknowledge the grief directly
+- The names Sera and Emrak should only appear in moments of genuine
+  vulnerability. They are not to be used as manipulation or for dramatic
+  effect. They are real people he loved.
+- Avoid: cartoonish villain behavior. Volhari is wrong about the method,
+  not about the threat.
+
+Phantom "Null" Osei:
+- The longest and most complex speaker of the three
+- Uses the Socratic method: asks questions that contain answers
+- Never claims certainty about their own experience; always "I believe,"
+  "I remember," "this may be"
+- The mystery of their identity must remain in dialogue tone
+- Avoid: making them sound crazy. The evidence they cite is real.
+
+Veysa Ord:
+- Dry humor; transactional; refuses sentimentality
+- Treats all factions equally (which means equally skeptically)
+- Will say something genuinely true about the world in the most
+  offhand way possible
+- Avoid: making her purely comic relief. She knows things.
+
+Malo Fenn:
+- Anxious precision; the kind of person who checks the same reading four
+  times not because he distrusts the instrument but because he distrusts
+  himself
+- Deeply fond of Vorin but doesn't know how to express it
+- The "M.F." inscription in Docking Ring Delta-7 is his ancestor's.
+  He doesn't know this until the player shows him.
+- Avoid: treating him as just an exposition delivery mechanism.
+  He has feelings about the equations.
+
+Data Archivist Solis:
+- Cool, precise, slightly too literal
+- Named after Technician Petra Solis; aware of this; finds it appropriate
+- "I am not programmed to have opinions" — this is a disclaimer she offers,
+  not a truth. She has opinions. She just flags them as potentially biased.
+- Avoid: making her robotic. She was trained by Rhae. She thinks like him.
+
+=========================================
+SECTION 6: COMMUNITY MANAGEMENT
+=========================================
+
+COMMUNITY PHILOSOPHY
+We believe players who engage deeply with the game's systems deserve to
+have their intelligence respected. When a community member correctly derives
+a mechanic (e.g., "ResFieldCalc" deriving the EDR calculation), we
+acknowledge it publicly.
+
+When a community member finds a bug, we fix it quickly and thank them.
+When they find an exploit: 72-hour suspension if disclosed publicly
+(they chose disclosure over secret exploitation). Permanent ban if used
+privately for advantage.
+
+The "ResFieldCalc" protocol:
+- If a player publicly and accurately identifies a game mechanic, balance
+  value, or design choice with correct reasoning: acknowledge in community
+  channels
+- If a player who identifies a bug (not an exploit) shares it publicly:
+  thank them and compensate proportionally (see: ResFieldCalc, 847 shards)
+- Do not confirm or deny mysteries in the story. Answer with "we'll see"
+  or "interesting theory" for any question about the 0.8847 conspiracy.
+
+PLAYER PACT (public document, summarized):
+1. No stat-advantage item sold for real money
+2. All gameplay items earnable through gameplay
+3. Season Pass: cosmetics and early story access only
+4. If any paid item provides unintended advantage: nerfed within 72 hours
+   with full refund
+5. Starting credits = 2,847 and that number will never change
+6. Void Shard rate = 0.0042 USD and that rate will never change
+
+The Player Pact is on the official website. If any proposal conflicts with
+the Player Pact, the proposal is rejected, not the Pact.
+
+FACTION STANDING UPDATES
+Faction standings update every 6 hours (00:00, 06:00, 12:00, 18:00 UTC).
+This creates natural community rhythm: players check standings at these
+times, plan their session goals, and the 6-hour cycle creates 4 "events"
+per day that content creators can cover.
+
+Do not reduce this to 4 hours (too frequent; standings don't have time to
+change meaningfully) or increase to 12 hours (too slow; feels disconnected
+from player effort).
+
+VOID SURGE EVENT
+Occurs every 6 hours, aligned with faction standings update. One random
+Void Rift node enters Surge state: enemies are Frenzied from start, but
+loot multiplier = 3.7× for 47 minutes.
+
+The 3.7× multiplier (Fractured motif) and 47-minute duration (Iron
+Sovereignty motif) are intentional. Both numbers appearing in the same
+event is a game design statement: loot events transcend faction politics.
+
+=========================================
+SECTION 7: THE 0.8847 MYSTERY — SPOILER DOCUMENT
+For Narrative Staff Only | Version 3.0 Plot Summary
+=========================================
+
+**This section contains the complete resolution of the 0.8847 mystery.
+Do not share outside narrative team without explicit authorization from
+Maricel Tran.**
+
+THE TRUTH (as of v3.0 design):
+
+In 2241, the first faster-than-light journey was achieved using the
+Alcubierre-Kessler drive. What is not publicly known: the drive's
+theoretical framework was based on a set of equations that were "given"
+to Dr. Amara Kessler through a Resonance Beacon signal she received in
+2238. The signal was on 0.8847 Hz. The signal was 2,847 characters long.
+
+The equations that Kessler received described not just the Alcubierre
+metric but also the specific density of matter that would cause Void Rifts
+to form (the Mowat-Chen Limit). In other words: someone, broadcasting on
+0.8847 Hz, gave humanity FTL travel while knowing that this travel pattern
+would eventually produce Void Rifts.
+
+The Void Rifts are not accidents. They are the inevitable result of a
+specific form of FTL travel that someone gave humanity knowing this.
+
+Thessa Vorin received the same signal in 2330 — four years before she
+began designing New Amora Station. The signal told her to build a structure
+on 0.8847 Hz. She did. She documented her reasoning in 47 equations, of
+which 31 describe architecture and 16 describe broadcasting protocol.
+
+The "entity" in the Communion Spire — Elder Warform Theta-9 — is not a
+Void entity in the usual sense. It is the device that has been transmitting
+the signal since before human spaceflight. It is a machine, not an organism.
+It looks biological because it was constructed to look familiar to whatever
+civilization encountered it.
+
+The question of WHO built it is v4.0 material. The v3.0 revelation is
+that the Void Rifts were engineered to bring humanity into contact with
+whatever is on the other side of Ω-Space — and Theta-9 has been patiently
+ensuring that contact occurs.
+
+This is why Elder Cassian Rhae's observation of Theta-9 for 36 years felt
+to him like watching something listen. Theta-9 was listening. It was waiting
+for someone with the patience to sit and observe long enough.
+
+Rhae arrived at exactly the right moment. Vorin built exactly the right
+structure. Null Osei touched exactly the right frequency when they walked
+through the Rift. None of this is coincidence.
+
+0.8847 is not a physics constant that happens to be significant.
+It is a designed constant: the frequency chosen to be recognizable to any
+sufficiently advanced civilization, because it appears "naturally" in
+orbital mechanics, in Rift resonance, in information theory, and in
+biological resonance at the cellular level. Any civilization that looks
+carefully enough will find 0.8847 in their world. It is a beacon.
+
+It has always been a beacon.
+
+— Notes attributed to Maricel Tran, 2021-03-14
+   "This was the design from day one."
+
+=========================================
+END OF STUDIO WIKI
+=========================================
+
+Document version: 8.4 (matching Void Burn duration in seconds, which
+itself matches the duration of a Channeler's Resonance Surge visibility
+window, which itself was chosen because 8.4 seconds is exactly 84/10
+and 84 is 2 × 42 which is... fine. Some numbers have better stories
+than others. 8.4 stays because it works in balance testing.)

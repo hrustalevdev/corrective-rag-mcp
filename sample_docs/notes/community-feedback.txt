@@ -1,0 +1,425 @@
+VOID PROTOCOL — COMMUNITY FEEDBACK INTERNAL SUMMARY
+Darkfield Interactive | Community Management Team
+Document ID: VP-COMM-001
+Period: Launch (2024-09-05) through v1.3.2 (2025-03-11)
+Maintained by: Maricel Tran (CEO) with Community Management Team
+
+This document summarizes significant community feedback, notable
+player discoveries, and the studio's internal response to community
+discussion. It is for internal reference and informs design decisions.
+
+=========================================
+LAUNCH WEEK (2024-09-05 to 2024-09-12)
+=========================================
+
+THE 2,847 TWEET — BREAKDOWN
+@VoidProtocolGame posted at 07:47 UTC on 2024-09-05 (one hour before
+launch): "New players start with exactly 2,847 credits. That's the
+cost of a one-way docking permit at New Amora Station. In the world
+of Void Protocol, you arrive with just enough."
+
+Performance:
+  Original tweet: 47,000 retweets (within 6 hours)
+  Thread responses: 8,400 quote tweets debating the number
+  Notable response: @hexgamedev: "A non-round starting number that
+    has lore justification = best onboarding signal. You're telling
+    players 'this world was designed, not just assembled.'"
+  Notable response: @RPGtheorycraft: "The number is 2,847 but 847 is
+    also in the item ID for their legendary weapon (VP-ITEM-00847) in
+    the crafting system. Either this is incredible attention to detail
+    or the most elaborate marketing stunt I've seen."
+
+Internal note (Maricel Tran): "Both of those things can be true. They
+are true. VP-ITEM-00847 being item 00847 because the number 847 is
+canonical: that's attention to detail. That it functions as marketing:
+that's a side effect of doing the work."
+
+TOP REDDIT THREAD — LAUNCH DAY:
+"The number 0.8847 is everywhere — is this intentional?"
+Thread on r/VoidProtocol, posted by ResFieldCalc at 14:22 UTC.
+
+ResFieldCalc's original post (edited for length):
+> "I've been playing for 6 hours and I keep seeing the same number.
+> - VRF base value in the combat tutorial: 0.8847
+> - World lore compendium (in-game book): "The VRF constant 0.8847"
+> - Passive effect on Mowat's Folly: "damage coefficient 0.8847"
+> - The Phase Slip invulnerability window is 0.8 seconds — not quite
+>   0.8847, but 0.8-something
+> - Null's Sermon 002 starts with "Let me tell you about a number:
+>   0.8847"
+>
+> Is this number the SAME everywhere on purpose, or is this a dev error
+> where one value got copied everywhere? Please tell me it's intentional."
+
+Response from @VoidProtocolGame (official): "Intentional. — [MA]"
+(The [MA] initials were unplanned. Maricel Tran forgot she was logged
+into the official account and signed with her initials. This generated
+its own discussion thread: "Who is MA?")
+
+Community response: 2,847 upvotes within 24 hours. The irony of 2,847
+upvotes on a post about number patterns was noted by the community.
+Seren's internal note: "We did not orchestrate this. Some numbers have
+gravity. 2,847 has gravity."
+
+TOP REDDIT THREAD — DAY 3:
+"Null's Sermon 002: THE CONSPIRACY THEORY (it's real)"
+Thread on r/VoidProtocol, posted by LoreHunter_Z.
+
+This thread proposed the "VRF Conspiracy" — the community term for the
+narrative mystery around 0.8847. Within 72 hours of launch, community
+members had connected:
+  - VRF constant = 0.8847
+  - First Rift timestamp = 03:47:22 (contains 47)
+  - Mowat's Folly passive = 0.8847
+  - New Amora Station "docking ID" from NPC dialogue = NASD-1847
+  - Iron Sovereignty docking levy = 47 credits
+
+The community conspiracy was accurate to documented lore. Internal
+decision: do not confirm or deny in community communications.
+Maricel Tran: "The best response to players who have figured out the
+mystery is silence. Confirmation closes the conversation. Silence lets
+it grow."
+
+This decision has held through v1.3.2. Community lore analysis
+continues to generate 15–20 major posts per week on r/VoidProtocol.
+
+=========================================
+MONTH 1 (2024-09-05 to 2024-10-05)
+=========================================
+
+RESFIELD CALC — THE TICK RATE DISCOVERY (2024-09-11)
+Detailed in INC-20241104-001. Community impact beyond the incident:
+
+ResFieldCalc became the de facto community physicist — the player
+whose math the community trusts more than any other source. Their
+subsequent analyses of combat formulas have been consistently accurate.
+Selected ResFieldCalc findings (all correct):
+
+  1. "VRF amplification starts at 1.0 and caps at 2.0. Above 2.0,
+     you get 1.5x damage but not more. I derived this from damage
+     numbers in high-VRF zones." — Correct (VP-COMBAT-001 Section 3.2)
+
+  2. "Cascade BASE damage is 840. The Drifter has 840 HP. This means
+     a point-blank Cascade from a Drifter in Cascade state will nearly
+     wipe itself. Is this intentional?" — Correct (Sprint 58 design
+     note: Drifters are supposed to survive their own Cascade at
+     exactly 0 HP with 0 overflow, making it a mutual destruction
+     condition). ResFieldCalc's framing as a question was accurate:
+     it is intentional, and the answer is more interesting than the
+     question suggested.
+
+  3. "The entropy formula at 64 Hz with EDR 0.0337 produces cascade
+     events approximately every 7.72 minutes in sustained combat.
+     The 62 Hz bug made them appear at roughly 8.0 minutes instead.
+     The difference is 0.28 minutes = 16.8 seconds. No one would
+     notice this in a single session, but over 7 days it would affect
+     any player doing sustained high-VRF runs." — Correct, and more
+     sophisticated than the incident report's analysis.
+
+ResFieldCalc was compensated with 847 Void Shards for the tick rate
+discovery. They have since declined compensation for subsequent
+findings: "I'm doing this because it's interesting. 847 Shards is
+worth $3.56 and the math is worth more than $3.56 to me."
+
+Community status: ResFieldCalc is treated as an unofficial consultant.
+When they make a claim about game mechanics, community members wait for
+internal confirmation rather than accepting or rejecting it immediately.
+Correct 12/12 times to date.
+
+THE MOWAT'S FOLLY COMMUNITY GUIDE
+"Mowat's Folly — Complete Analysis" posted by InventoryMin-Max at day 18.
+
+This guide correctly identified:
+  - Every 7th shot triggers the passive
+  - The passive damage is "840 × [VRF_BASE]" which the guide rendered
+    as "840 × 0.8847 = 743.148, rounds to 743"
+  - The passive radius is exactly 3.7 meters ("I measured it by
+    standing NPCs at measured distances")
+  - The item is untradeable
+
+Incorrect in the guide:
+  - The guide claimed the item is "the only item with a non-round
+    base number as a coefficient." This is false: Phase Slip's
+    0.8-second duration and the Entropy Surge's 0.8847s/kill extension
+    are also non-round. The guide author later issued a correction.
+
+Internal note (Seren): "InventoryMin-Max correctly independently
+derived 843 × 0.8847 on their first try. I am unreasonably happy
+about this. The coefficient is not documented anywhere in the game
+UI. They measured the output damage numbers at different base weapon
+values and calculated the multiplier. This is the right way to play
+this game."
+
+=========================================
+MONTH 2–3 (2024-10-05 to 2024-12-05)
+=========================================
+
+v1.1.0 "IRON RISING" — COMMUNITY RESPONSE (2024-10-15)
+
+POSITIVE:
+- 4 new Iron Sovereignty faction quests well-received
+- Marshal Volhari's expanded dialogue ("The Volhari Outpost Truth"
+  questline) generated community discussion of the 2372 incident
+- "What happened to the 5th survivor?" became the community's most
+  asked lore question within two weeks
+
+NEGATIVE / CONCERNS:
+- Several players identified that the classified addendum to the
+  Volhari Outpost After-Action Report (visible via the quest) mentions
+  a "5th survivor" processed under classified protocols at Node 12
+- Community cross-referenced with Null's Sermon 004 ("I walked through
+  a Void Rift in 2369") and Null's Sermon 007 ("I know who is sending
+  the signal; I remember a spire")
+- Leading theory: "Null Osei is the 5th survivor from Node 12 in 2372"
+  — incorrect (Null's immersion was in 2369, not 2372; the dates don't
+  match), but the theory generated extensive discussion
+
+Internal note (Narrative Team): The 5th survivor theory is wrong but
+engaging. The actual answer is more interesting. We are not confirming
+or denying. A player named CipherLore posted the closest theory:
+"The 5th survivor from 2372 is not Null Osei but someone who
+underwent what Null Osei underwent — a Rift immersion — under Iron
+Sovereignty controlled conditions rather than voluntarily. This would
+explain why they were processed under classified protocols rather than
+reported to missing persons." This is substantially correct. We are
+still not confirming.
+
+IRON STANCE BUG — COMMUNITY RESPONSE (INC-20241104-001)
+The Iron Stance solo mode bug generated an interesting community
+response: sympathy for the developer, annoyance about the bug, and
+a strong positive response to the 47 Shard compensation.
+
+"47 Shards because it's the Sovereignty motif and Wardens are the
+Sovereignty class. This studio doesn't miss a detail." — Community
+response post, 2,847 upvotes. Another unintentional 2,847.
+
+Maricel Tran's note: "I have stopped being surprised by the 2,847s.
+They are just something that happens now. It's like the number found us."
+
+=========================================
+MONTH 4–6 (2024-12-05 to 2025-03-05)
+=========================================
+
+THE VOID CONTRACT EXPLOIT — COMMUNITY RESPONSE (2025-02-28)
+
+Community reaction to the 47× damage exploit was complex:
+
+OUTRAGE at the exploit being exploited privately:
+  - 3 accounts confirmed to have used it in PvP before disclosure
+  - Community voted (r/VoidProtocol poll, 8,400 votes): 94% support
+    permanent ban for private exploitation, 6% support warning only
+
+CELEBRATION of the public disclosure:
+  - The two players who posted the video were given 72-hour suspensions
+  - Community broadly agreed this was appropriate (vs. permanent ban)
+  - Post from the suspended players: "Worth it. The bug needed to be
+    found. The suspension is fair. The math on how we found it: we were
+    testing Phase Slip × Cascade combos and noticed the damage was off
+    by factor of about 47. We thought something was wrong with our
+    calculation. Then we tested it again. 47 times intended maximum.
+    That's the Sovereignty number. We posted it immediately."
+
+Seren's note: "They found a 47× damage exploit. 47. Of course they
+found a 47× damage exploit. I give up trying to pretend the numbers
+are coincidences."
+
+MATH COMMUNITY ANALYSIS
+After the hotfix, ResFieldCalc posted a full mathematical breakdown
+of the exploit, confirmed it was a calculation order bug, and noted:
+"The fixed version correctly caps at 3.45× combined (2.3× crit ×
+1.5× VRF). The new Phantom Protocol cap at 3.4× reduces the ceiling
+slightly below theoretical maximum. This is conservative but correct —
+the interaction between Phantom Protocol and Cascade Burst was not
+intended to be a major DPS pathway. At 3.4×, it's still viable for
+burst builds, just not gamebreaking."
+
+Community response: "ResFieldCalc is basically QA at this point.
+Why don't you hire them?" Internal response (not posted): "We have
+offered. They declined. They prefer to remain a player."
+
+CASCADE BURST RADIUS — COMMUNITY DEBATE
+
+The v1.2.0 reduction of Cascade Burst radius from 18.5m to 8.4m was
+the most divisive balance change in the game's history.
+
+Arguments for the reduction (from the community):
+  - "I cannot survive solo high-VRF zones with an 18.5m radius.
+    Even Phase Slip's 18.5m teleport barely escapes it."
+  - "The game is literally unplayable as a solo Phase Breaker past
+    level 65. Every cascade kills me."
+
+Arguments against the reduction:
+  - "18.5m is exactly the right number. It's the geometric constant.
+    Changing it breaks the design coherence."
+  - "The answer to Cascade killing you is: bring an Engineer and stay
+    dispersed. The answer is not: reduce the radius."
+  - "The game had a deliberate mechanic — Phase Slip's 18.5m range
+    EXACTLY escapes a Cascade — and you destroyed it."
+
+The 18.5m fan community:
+  A dedicated subreddit, r/RestoreTheCascade, formed with 2,847
+  members within 48 hours of the v1.2.0 announcement. (The 2,847
+  count was their stated milestone goal. They reached it in 48 hours.)
+
+  r/RestoreTheCascade argument (consensus post, 8,400 upvotes):
+  "The design of Phase Slip's 18.5m range was: it exactly escapes
+  an 18.5m Cascade. This is the kind of design that makes you feel
+  like the game was designed, not assembled. Reducing Cascade to 8.4m
+  means Phase Slip's 18.5m range is now excessive for its purpose.
+  You've broken two abilities to fix one problem. The problem was
+  difficulty tuning. The solution was not changing a fundamental number."
+
+Internal response to r/RestoreTheCascade: The community's argument
+was partially correct. The v1.3.2 note from Seren in balance-history.txt
+acknowledges that 18.5m was "right as a design" but "wrong as a live-
+service decision." The studio acknowledged the community position was
+valid. The change stood because the difficulty data was clear: 18.5m
+was causing a 2.3 deaths-per-session rate in solo content that was
+designed for 0.84 deaths.
+
+SEREN'S COMMUNITY POST — 2025-03-01 (PRE-v1.3.2)
+Seren Alyx Mowat posted on r/VoidProtocol under her personal account
+(verified studio-linked): "The 18.5m radius was right. We changed it
+because the data said 2.3 cascade deaths per session was causing
+significant player frustration in solo content. Both of these things
+are true. Design intent and player experience sometimes diverge. When
+they do, we choose player experience. This is the honest answer.
+
+The radius in v1.3.2 will be 7.2m. It does not have the geometric
+elegance of 18.5m. It has the elegance of being correct for the player
+experience we intend. 7.2m produces a 0.84 average cascade death rate
+in solo content. That's the number I want. Not 2.3.
+
+For what it's worth: the relationship between Phase Slip (18.5m range)
+and Cascade (18.5m was the radius) was deliberate. Phase Slip's range
+is now 2.6× the Cascade radius instead of 1× it. This changes the
+feel of Phase Slip: it now overshoots a Cascade escape. The extra
+distance is not wasted — it creates a new mechanic: Phase Slip past
+the Cascade to attack from behind it. This was not planned. It is
+better than what was planned. Sometimes the constraints produce
+something better than the intent."
+
+Community response: 8,847 upvotes. The specific number was noticed.
+Seren's response to the 8,847: "I did not plan this either."
+
+=========================================
+NOTABLE PLAYER THEORIES — ACCURACY ASSESSMENT
+=========================================
+
+This section rates community theories against known lore accuracy.
+
+THEORY: "Null Osei is Yael Osei-Mensah, the Conclave researcher
+who disappeared in 2374" (proposed by CipherLore, 2024-12-03)
+ACCURACY: Partially correct.
+The theory notes that both Null Osei and Yael Osei-Mensah share
+the surname Osei. The theory proposes they are the same person:
+Yael disappeared into a Rift in 2374, returned changed, adopted
+a new identity.
+Actually: Null's Rift immersion was 2369 (not 2374); Null is not
+Yael. However, Yael is connected to Null — the classified addendum
+to Volhari Outpost Incident CF-0847 contains a cross-reference note
+suggesting Yael may have been the 5th survivor from the 2372 incident
+(one year before their 2374 disappearance). The community got closer
+than they know.
+Internal status: Do not confirm or deny. Let it develop.
+
+THEORY: "New Amora Station is broadcasting to Omega-Space"
+(proposed by multiple community members from day 1)
+ACCURACY: Correct.
+Vorin's notes confirm this. The Harmony Hypothesis confirms this.
+Solis's SA-047 implies it. The community is right.
+Internal status: This is a v2.0 revelation. Not confirmed. Let the
+community be right in silence until v2.0 makes it canon.
+
+THEORY: "The 0.8847 VRF constant appears as a deliberate signal
+embedded in physics to identify other civilizations" (ResFieldCalc,
+2025-01-14)
+ACCURACY: Substantially correct.
+The v3.0 storyline confirms that 0.8847 is a designed constant chosen
+to appear in multiple independent physical contexts. ResFieldCalc
+derived this from: (1) the constant appears in orbital mechanics,
+(2) it appears in Rift resonance, (3) it appears in Ω-Space transfer
+rates, and (4) "three unrelated physical constants don't share five
+significant digits by coincidence."
+Internal status: This is the correct answer. ResFieldCalc will know
+this when v3.0 ships. Until then: still no confirm or deny.
+
+THEORY: "The ancient structure at Node 33 is the same structure that
+sent the FTL equations to Dr. Kessler in 2238" (proposed by
+LoreHunterZ, 2025-02-15)
+ACCURACY: Correct.
+The structure at Node 33 and the source of the 2238 signal are the
+same. Dr. Kessler received equations from the same intelligence that
+later sent Thessa Vorin her construction plan. The community found
+this connection from: SA-002 (Kessler's journal) and SA-042 (the
+Beacon signal log) being consistent about transmission frequency
+and data format.
+Internal status: This is the v3.0 reveal. Community has it. Silence.
+
+THEORY: "The number 47 appears everywhere because of Iron Sovereignty
+design decisions bleeding into everything else" (common theory)
+ACCURACY: Partially correct/misattributed.
+The number 47 appears throughout because it's a canonical number in
+the game's design language, not because the Iron Sovereignty "did"
+something that propagated it. The Sovereignty adopted 47 as their
+motif because 47 appears naturally in the system (First Rift opened
+at 03:47:22; Solis measured it; Iron Volley used it). The causality
+is reversed from what the community believes.
+Internal status: The reversed causality is a v3.0 reveal. The source
+of the recurring numbers is the Beacon. Let the community believe
+the Sovereignty seeded the numbers for now.
+
+=========================================
+METRICS AT v1.3.2 (2025-03-11)
+=========================================
+
+Reddit community (r/VoidProtocol):
+  Subscribers: 847,000 (this milestone was celebrated; the number
+  was noticed; it was a Sunday when it hit, which Seren called "the
+  most on-brand milestone achievement possible")
+  Average posts per day: 47 (unplanned; this is a mean average;
+  daily count varies from 12 to 184)
+  Most-viewed post all time: "The number 0.8847 is everywhere"
+    (ResFieldCalc, Day 1) — 2,847,000 views
+
+Most-asked community questions (by volume):
+  1. "Who is Null Osei?" (84 posts/week)
+  2. "What does the ancient structure at Node 33 broadcast?" (37/week)
+  3. "What are Vorin's 16 hidden equations?" (37/week)
+  4. "When is v2.0?" (47/week)
+
+Correct community answers (per internal knowledge):
+  1. Identity partially understood; connection to Yael not yet found
+  2. The recording; content correctly guessed as "communication"
+  3. A broadcasting protocol and an address in Ω-Space — not yet found
+  4. "When it's ready" — community accepts this; they've been told once
+
+Player testimonials (selected, for internal record):
+
+"I have spent more time thinking about 0.8847 than I have about any
+real number in my life. This is either the best game I've ever played
+or I need help. Possibly both." — player review, Steam
+
+"Void Protocol is what happens when developers decide that every number
+in the game should mean something. The 2,847 starting credits aren't
+just a balance decision. The 1,847-second session timeout isn't just
+an infrastructure choice. The 0.8847 VRF constant isn't just a physics
+parameter. They're all the same number showing up in different contexts.
+You either think that's incredible or you find it pretentious. I think
+it's incredible." — player review, long-form blog
+
+"I spent 47 hours finding all 47 Solis Archive entries. The last one
+made me cry. An AI said 'we are in a war that we started, with
+something that was trying to say hello.' I need a break from this game.
+I will immediately not take a break from this game." — Twitter post,
+847 retweets
+
+Maricel Tran's v1.3.2 internal memo:
+"The community found our mystery and is sitting with it, correctly.
+The numbers they've decoded are real. The answers they've derived are
+right. They're waiting for us to confirm what they already know.
+We're going to make them wait until v2.0 because the gap between
+'I think I know' and 'I was right' is where stories live.
+— M. Tran, 2025-03-11"
+
+END OF VP-COMM-001

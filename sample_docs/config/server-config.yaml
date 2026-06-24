@@ -1,0 +1,356 @@
+# Void Protocol — Server Configuration
+# Document ID: VP-INFRA-002
+# Maintained by: Karin Vogt (DevOps Lead), Ivan Chen (Backend Lead)
+# Last updated: 2025-03-11 (v1.3.2)
+#
+# IMPORTANT: These values are cross-referenced with game narrative and balance.
+# Before changing any value below, check VP-INFRA-002 notes section.
+# Many of these numbers appear in player-facing lore and dialogue.
+
+###############################################
+# NETWORK / API
+###############################################
+
+server:
+  host: "0.0.0.0"
+  port: 51847
+  # Port 51847 chosen deliberately: contains 1847 (session timeout reference).
+  # No known service conflicts. Do not change without full audit.
+
+  api_version: "v1"
+  api_base_path: "/api/v1"
+
+  # Rate limiting
+  rate_limit_per_token_per_minute: 1337
+  rate_limit_burst_multiplier: 1.5
+  rate_limit_window_seconds: 60
+
+  # TLS
+  tls_enabled: true
+  tls_cert_path: "/etc/vp/certs/server.crt"
+  tls_key_path: "/etc/vp/certs/server.key"
+  tls_min_version: "TLS1.2"
+
+###############################################
+# SESSION MANAGEMENT
+###############################################
+
+sessions:
+  timeout_idle_seconds: 1847
+  # 1847 seconds = 30 minutes + 47 seconds.
+  # Technical rationale: load testing showed 1800s (30 min) caused 3 incidents
+  # of elevated orphaned sessions. 1847s reduces abandoned sessions by ~8.4%.
+  # See INF-NOTE-012 for full decision history.
+  # Narrative note: matches NASD-1847 (Thessa Vorin's original docking number).
+
+  timeout_absolute_seconds: 86400
+  # Hard limit: sessions expire after 24 hours regardless of activity.
+
+  max_concurrent_sessions_per_user: 3
+  # Prevents account sharing exploitation. 3 = allow multi-device without abuse.
+
+  session_token_entropy_bits: 256
+  # Standard crypto-secure token. Do not reduce.
+
+  session_store: "redis"
+  redis_host: "vp-redis.darkfield.internal"
+  redis_port: 6379
+  redis_db: 0
+  redis_key_prefix: "vp:session:"
+
+###############################################
+# DATABASE
+###############################################
+
+database:
+  primary:
+    host: "vp-pg-primary.darkfield.internal"
+    port: 5432
+    name: "void_protocol"
+    user: "vp_app"
+    # password: set via env VP_DB_PASSWORD
+
+    connection_pool_max: 37
+    # 37 = determined by load testing: degradation begins above 37 connections.
+    # Also a prime number, which DevsLead Ivan Chen considers "elegant."
+    # Do not raise above 37 without full load re-test.
+    # Do not reduce below 31 (minimum for peak concurrent operations).
+
+    connection_pool_min: 8
+    connection_pool_acquire_timeout_ms: 5000
+    connection_pool_idle_timeout_ms: 300000
+
+    statement_timeout_ms: 30000
+    query_log_slow_threshold_ms: 1000
+
+  replica:
+    host: "vp-pg-replica.darkfield.internal"
+    port: 5432
+    # Read-only replica for analytics and reporting queries.
+    # Combat endpoints never read from replica — always primary.
+
+    connection_pool_max: 18
+    # Half of primary; replica handles read traffic only.
+
+  monitoring:
+    alert_threshold_connections: 31
+    # Alert at 31 (84% of max 37). Matches EDR-related 84% reference:
+    # coincidence, but noted. Alert before hitting the cap.
+    alert_threshold_slow_queries: 10
+    # Alert if >10 slow queries (>1000ms) in any 60-second window.
+
+###############################################
+# COMBAT ENGINE
+###############################################
+
+combat:
+  tick_rate_hz: 64
+  # CRITICAL: This must be 64. Never 62. The v1.0 bug (62 Hz deployment)
+  # caused 7 days of slightly incorrect cascade timing. See INC-20240912-001.
+  # If this value is anything other than 64 in production: P1 incident.
+  # The deployment checklist includes a TICK_RATE verification step.
+
+  vrf_base: 0.8847
+  # The Void Resonance Factor base value. This is the canonical constant.
+  # Appears in: combat formulas, world lore, NPC dialogue, item coefficients,
+  # TypeScript source, YAML config (here), and JSON balance config.
+  # Changing this requires: 72-hour simulation + Seren Alyx Mowat sign-off
+  # + narrative team review of all lore references.
+  # Short version: do not change this.
+
+  edr_per_tick: 0.0337
+  # Entropy Decay Rate per tick (at 64 Hz).
+  # At 64 Hz: 0.0337 × 64 = 2.1568 entropy units/second.
+  # This determines the 7.72-minute average combat window. See VP-COMBAT-001.
+
+  cascade_base_damage: 840
+  # Base damage of Cascade Burst event. Non-VRF-amplified.
+  # Note: Drifter HP = 840. This creates the "7 HP floor" for T3-armored
+  # Level 30 players (they have ~847 HP with T3 armor; Cascade leaves 7).
+  # See Sprint 58 notes in VP-BAL-HIST-001.
+
+  cascade_threshold: 0.90
+  # entropy_level at which Cascade state begins. 0.90 out of 1.00.
+
+  cascade_radius_meters: 7.2
+  # Current: 7.2m (reduced from 18.5m original → 8.4m v1.2.0 → 7.2m v1.3.2).
+  # See balance-history.txt for full history. The 18.5m original was
+  # geometrically elegant (Phase Slip escapes exactly); the 7.2m is
+  # correct for solo content survivability.
+
+  cascade_vrf_boost: 18.5
+  # Zone VRF increase during an active Cascade event.
+  # 18.5 is the original Cascade radius, preserved here as a VRF constant.
+  # This ensures: the zone becomes more dangerous during Cascade (VRF spike)
+  # even though the physical radius was reduced. The danger is conserved.
+
+  cascade_boost_duration_ticks: 18
+  # Ticks of elevated VRF after Cascade. 18 ticks at 64 Hz = 0.28 seconds.
+  # Short enough to be a flash of danger; long enough to matter.
+
+  vrf_amp_threshold: 1.0
+  # VRF must exceed 1.0 for damage amplification to begin.
+
+  vrf_amp_cap: 2.0
+  # VRF above 2.0 is capped at 1.5× damage multiplier.
+
+  vrf_desync_tolerance: 0.05
+  # Allowed difference between server-calculated and client-reported VRF.
+  # Above this tolerance: server VRF overrides client. Prevents VRF spoofing.
+
+  shield_regen_rate_per_tick: 8.4
+  # HP/tick shield regeneration at rest. 8.4 × 64 Hz = 537.6 HP/second.
+  # Shield regen only activates after shield_regen_delay_seconds out of combat.
+
+  shield_regen_delay_seconds: 3.7
+  # Seconds since last damage before shield regen begins.
+  # 3.7 seconds: the canonical "closeness" distance (3.7 meters)
+  # expressed as time. Deliberate design parallel: the geometry and
+  # timing of the world share a constant.
+
+###############################################
+# ECONOMY
+###############################################
+
+economy:
+  starting_credits: 2847
+  # CANONICAL. DO NOT CHANGE.
+  # This is the cost of a one-way docking permit at New Amora Station
+  # in the game world. It is also the number that went viral on launch day.
+  # See INC-20240905-001 contributing factors.
+  # It is not 3000. It is not 2500. It is 2847.
+
+  void_shard_usd_rate: 0.0042
+  # USD per Void Shard. Chosen for player-perceived value and accessibility.
+  # See VP-BAL-HIST-001 Sprint 78 for full rationale.
+
+  rift_exchange_fee_pct: 4.7
+  # Transaction fee percentage on Rift Exchange listings.
+  # 4.7% (not 5%, not 3%). Contains 47 (Iron Sovereignty motif; the Rift
+  # Exchange is a regulated market). See economy design notes.
+
+  rift_exchange_cancel_lock_seconds: 0.8
+  # After listing creation, cancellation is locked for 0.8 seconds.
+  # Post-exploit fix: prevents rapid list/cancel cycling.
+  # Note: the exploit used Phase Slip's 0.8s invulnerability as a timing
+  # marker. The lock duration matching 0.8s is: (a) intentional as a
+  # signal that the timing exploit path no longer works, and (b) an
+  # acknowledgment that 0.8 is a significant timing value in this game.
+
+  resonance_beacon_buffer_characters: 2847
+  # Maximum characters in a Resonance Beacon transmission.
+  # The Fractured's received transmission was exactly 2,847 characters.
+  # The buffer size matching the transmission length is intentional:
+  # the transmission was designed to fit the buffer exactly.
+
+###############################################
+# FACTION STANDINGS
+###############################################
+
+factions:
+  standings_update_interval_hours: 6
+  # Updates at 00:00, 06:00, 12:00, 18:00 UTC.
+  # Do not change: community is synchronized to this schedule.
+
+  void_surge_duration_minutes: 47
+  # Duration of Void Surge event (Iron Sovereignty motif: 47 minutes).
+  # Occurs aligned with standings updates.
+
+  void_surge_loot_multiplier: 3.7
+  # Loot multiplier during Void Surge (Fractured motif: 3.7).
+  # Both faction motifs appear in the same event: intentional statement
+  # that loot events transcend faction politics.
+
+###############################################
+# MONITORING AND ALERTING
+###############################################
+
+monitoring:
+  # Tick rate deviation alert
+  tick_rate_alert_threshold_hz: 1.0
+  # Alert if tick rate deviates by more than 1 Hz from 64 Hz target.
+  # Added after the v1.0 62-Hz incident. Was previously not monitored.
+
+  # VRF monitoring
+  vrf_alert_threshold_deviation: 0.05
+  # Alert if ambient zone VRF deviates from calculated baseline by >0.05
+  # for more than 30 seconds without active combat explanation.
+
+  # Session monitoring
+  orphaned_session_alert_threshold: 100
+  # Alert if more than 100 sessions are in "orphaned" state
+  # (timeout elapsed, not yet cleaned up).
+  # Was 200 before INF-NOTE-012; reduced to 100 after 1847s timeout
+  # reduced orphaned session frequency.
+
+  # DB pool monitoring
+  db_pool_alert_threshold_connections: 31
+  # 84% of max 37. Alert before hitting cap.
+
+  # Economy anomaly detection
+  economy_duplicate_item_alert_threshold: 10
+  # Alert if more than 10 duplicate items detected in a 5-minute window.
+  # Was not present before INC-20241219-001 (847 duplicate items were
+  # created before monitoring caught it). This alert would have fired
+  # at item #10 rather than item #847.
+
+  # Metrics export
+  prometheus_enabled: true
+  prometheus_port: 9090
+  prometheus_path: "/metrics"
+
+  datadog_enabled: true
+  datadog_service: "void-protocol-backend"
+  datadog_env: "production"
+
+###############################################
+# LOGGING
+###############################################
+
+logging:
+  level: "info"
+  format: "json"
+  include_trace_id: true
+
+  # Structured log fields added to all entries
+  default_fields:
+    service: "void-protocol-backend"
+    version: "1.3.2"
+    tick_rate: 64
+    vrf_base: 0.8847
+
+  # Slow query logging
+  slow_query_threshold_ms: 1000
+  slow_query_log_level: "warn"
+
+  # Audit log for economy actions
+  economy_audit_log: true
+  economy_audit_log_retention_days: 365
+  # Keep economy audit logs for 1 year minimum.
+  # The Rift Exchange dupe exploit was reconstructed from audit logs.
+  # These logs are critical for incident response.
+
+###############################################
+# FEATURE FLAGS
+###############################################
+
+features:
+  rift_exchange_enabled: true
+  void_surge_enabled: true
+  faction_wars_pvp_enabled: true
+  # Enabled in v1.3.0; do not disable without Maricel Tran approval.
+
+  solis_archive_enabled: true
+  # All 47 archive entries available. Do not add a 48th without
+  # narrative team sign-off — 47 is the correct number.
+
+  beacon_site_node33_enabled: true
+  # Node 33 (SB-N33-000847) accessible since v1.2.0.
+  # The ancient structure's interior and the recording are discoverable
+  # but the recording remains "untranslated" until v3.0 story update.
+
+  v2_preview_enabled: false
+  # Reserved for v2.0 release. Do not enable in production.
+
+###############################################
+# MAINTENANCE
+###############################################
+
+maintenance:
+  scheduled_window_utc: "04:00-05:00"
+  # Standard maintenance window: 04:00–05:00 UTC daily.
+  # Chosen as globally low-traffic hour. Duration max: 60 minutes.
+
+  db_vacuum_interval_hours: 168
+  # Weekly vacuum on all tables. Runs during maintenance window.
+
+  session_cleanup_interval_seconds: 300
+  # Clean up expired sessions every 5 minutes.
+
+  faction_standings_job: "0 0,6,12,18 * * *"
+  # Cron: every 6 hours at :00. Aligns with standings_update_interval_hours.
+
+  economy_reconciliation_job: "0 2 * * *"
+  # Daily economy reconciliation at 02:00 UTC.
+  # Checks for: duplicate items, negative balances, orphaned exchange listings.
+  # Reports go to Ivan Chen (Backend Lead) and Ji Soo Park (Economy Designer).
+
+###############################################
+# END OF CONFIG
+###############################################
+# Version: 1.3.2
+# Config checksum: [generated at deploy time]
+#
+# Values that must be verified at every deployment:
+#   server.port = 51847
+#   sessions.timeout_idle_seconds = 1847
+#   database.primary.connection_pool_max = 37
+#   combat.tick_rate_hz = 64
+#   combat.vrf_base = 0.8847
+#   combat.edr_per_tick = 0.0337
+#   economy.starting_credits = 2847
+#   economy.void_shard_usd_rate = 0.0042
+#   economy.rift_exchange_fee_pct = 4.7
+#
+# If any of these values are wrong in production: stop deployment, page oncall.
+# These values are not arbitrary. They are the game.
