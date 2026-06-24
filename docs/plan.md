@@ -110,34 +110,40 @@ MAX_RETRIEVE_RETRIES=2
 
 ---
 
-### 🔲 Итерация 1: Scaffolding + MCP скелет
+### ✅ Итерация 1: Scaffolding + MCP скелет
 
 **Цель:** MCP сервер стартует, 4 инструмента видны в MCP Inspector, возвращают заглушки.
 
-**Статус:** НЕ НАЧАТА
+**Статус:** ЗАВЕРШЕНА
 
-**Файлы для создания:**
-- `package.json` — обновить с зависимостями
-- `tsconfig.json` — обновить (ESM, NodeNext)
-- `src/config.ts` — конфиг из env
-- `src/server.ts` — создание Server, регистрация инструментов
-- `src/index.ts` — запуск через stdio
+**Что сделано:**
+- `package.json` обновлён: scripts `build/start/dev/test`, зависимости установлены
+- `tsconfig.json`: target ES2022, module commonjs, strict
+- `src/config.ts` — конфиг из env (Ollama URL/model, Chroma URL, RAG параметры)
+- `src/server.ts` — McpServer с 4 инструментами через `registerTool` (v2 API), подробные descriptions на английском
+- `src/index.ts` — запуск через StdioServerTransport (без лишних console.log в stdout)
 - `src/tools/index-folder.ts` — заглушка
 - `src/tools/ask-question.ts` — заглушка
 - `src/tools/find-relevant.ts` — заглушка
 - `src/tools/index-status.ts` — заглушка
 
-**Зависимости для установки:**
+**Установленные зависимости:**
 ```
-@modelcontextprotocol/sdk
-zod
-```
-**Dev-зависимости:**
-```
-typescript @types/node vitest tsx
+@modelcontextprotocol/sdk@^1.29.0  zod@^4.4.3
+tsx@^4.22.4  vitest@^4.1.9  @types/node@^26.0.0  typescript@^5.5.3
+@modelcontextprotocol/inspector@^0.22.0
 ```
 
-**Проверка:** `npx @modelcontextprotocol/inspector npx tsx src/index.ts` показывает 4 инструмента.
+**Важные выводы (для следующего агента):**
+- MCP SDK v2: использовать `server.registerTool(name, { description, inputSchema: z.object({...}) }, callback)`. Метод `server.tool()` — deprecated, инспектор показывает предупреждение.
+- Транспорт stdio: stdout строго для JSON-RPC. Любой `console.log` в stdout ломает протокол. Для отладки — только `console.error` (пишет в stderr, видно в инспекторе).
+- MCP Inspector v0.22.0: хранит настройки подключения в localStorage браузера. При проблемах — чистить localStorage / открывать в incognito. Запуск: `npm run dev` → открыть URL из вывода в браузере → Transport=STDIO, Command=tsx, Arguments=src/index.ts.
+- Имя сервера `rag-knowledge-base` (не `corrective-rag-mcp`) — описывает что делает, а не как реализован.
+- Descriptions инструментов — на английском (агенты Copilot/Claude лучше работают с английским).
+
+**Проверено:** `npm run build` — чистая сборка. MCP Inspector: все 4 инструмента видны, `index_status` вызывается успешно.
+
+**Запуск для разработки:** `npm run dev`
 
 ---
 
