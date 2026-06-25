@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ProgressTracker } from '../progress.js';
+import { ProgressTracker } from '../tracker.js';
 
 describe('ProgressTracker', () => {
   describe('measureBatch', () => {
