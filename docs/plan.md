@@ -194,36 +194,58 @@ tsx@^4.22.4  vitest@^4.1.9  @types/node@^26.0.0  typescript@^5.5.3
 
 ---
 
-### 🔲 Итерация 2.7: Прогресс индексации + замер производительности
+### ✅ Итерация 2.7: Прогресс индексации + замер производительности
 
 **Цель:** убедиться что всё работает вживую, замерить скорость эмбеддинга, принять решения по дальнейшей архитектуре (Docker vs нативный Ollama, выбор модели).
 
-**Статус:** НЕ НАЧАТА
+**Статус:** ЗАВЕРШЕНА
 
-**Что сделано (код):**
-- `src/progress.ts` — класс `ProgressTracker` (инстанс создаётся на каждый вызов инструмента в `server.ts`)
-  - `onBatch(p)` — логирует батч в stderr + MCP progress notification
+**Что сделано:**
+
+- `src/progress.ts` — класс `ProgressTracker`, инстанс на каждый tool call, жизненный цикл совпадает с запросом
+  - `measureBatch(fn, { totalBatches })` — HOF: оборачивает `fn`, измеряет время внутри, логирует батч + MCP-нотификация
   - `onDone(totalChunks)` — итоговая строка с avg tok/s
-  - `BatchProgress`, `BatchProgressCallback` — типы для `addChunks`
-- `src/retriever/vector.ts` — `addChunks(chunks, onProgress?)` измеряет `elapsedMs` и `tokensPerSec` per batch, вызывает callback
-- `src/indexer/indexer.ts` — принимает `tracker?: ProgressTracker`, передаёт в `addChunks`
-- `src/tools/index-folder.ts` — прокидывает `tracker`
-- `src/server.ts` — `new ProgressTracker(ctx)` → `handleIndexFolder`
-- Вывод per batch: `[indexer] batch 2/10 | 50 chunks | 1234ms | ~6500 tok/s`
-- Итоговая строка: `[indexer] done: 500 chunks, 12.3s total, avg ~7200 tok/s`
-- MCP progress notification: `progress/total` + message (только если клиент передал `progressToken`)
+  - `onError(err)` — лог ошибки с числом завершённых батчей
+  - Все внутренние типы (`_BatchProgress`, `_RawBatchMeta`) и приватные поля скрыты — наружу только 3 публичных метода
+- `src/retriever/vector.ts` — `addChunks(chunks, tracker?)`:
+  ```typescript
+  const embedFn = emb.embedDocuments.bind(emb);
+  const embed = tracker?.measureBatch(embedFn, { totalBatches }) ?? embedFn;
+  // тело цикла не знает о трекере
+  ```
+- `src/indexer/indexer.ts` — принимает `tracker?: ProgressTracker`, передаёт в `addChunks`, вызывает `onDone`/`onError`
+- `src/tools/index-folder.ts` — принимает и прокидывает `tracker`
+- `src/server.ts` — `new ProgressTracker(ctx)` создаётся на каждый вызов `index_folder`
+- `glob_pattern` убран из схемы инструмента (не использовался)
 
-**Что ещё сделать (живое тестирование):**
+**Формат вывода:**
+```
+[indexer] batch 2/10 | 50 chunks | 1234ms | ~6500 tok/s   ← stderr + MCP notify (одно сообщение)
+[indexer] done: 213 chunks, 4.1s total, avg ~6800 tok/s
+[indexer] failed after 2/10 batches: connect ECONNREFUSED  ← при ошибке
+```
 
-**Проверка (вживую):**
-1. Запустить ChromaDB и Ollama (Docker или нативно)
-2. Вызвать `index_folder("sample_docs")` через MCP Inspector
-3. Наблюдать прогресс в Stderr инспектора
-4. Зафиксировать tok/s для Docker и нативного Ollama
+**Архитектурные решения:**
+- `ProgressTracker` — отдельный модуль `src/progress.ts`, не привязан к домену indexer
+- Жизненный цикл: новый инстанс per tool call → данные не протекают между вызовами, `reset()` не нужен
+- В Итерации 4 (`ask_question`) добавить `onRagStep()` в тот же класс
 
-**Решения по результатам:**
-- Если Docker < 10 tok/s → рассмотреть нативный запуск или облачную модель (см. memory: LLM modes plan)
-- Если качество устраивает → продолжать с текущим стеком
+**Живое тестирование (ЗАВЕРШЕНО):**
+
+`npm run test:index` — скрипт `scripts/test-indexer.ts`, проверяет доступность сервисов и запускает индексацию с `ProgressTracker`.
+
+Результаты на MacBook M1 Pro, модель `nomic-embed-text` (137M, F16), 754 чанка / 24 файла:
+
+| Окружение | Cold start (batch 1) | Стабильный батч | avg tok/s | Всего |
+|---|---|---|---|---|
+| Ollama в Docker | 43 199ms | 12–31с | ~384 tok/s | 340с (5.7 мин) |
+| Ollama нативный | 3 307ms | 1–1.5с | ~6 297 tok/s | 20.7с |
+
+**Разница: нативный в ~16 раз быстрее.**
+
+**Почему Docker медленный на Mac:** Docker работает через Linux VM без доступа к Metal/Neural Engine — только CPU. На Linux/Windows с NVIDIA GPU через `--gpus all` Docker даёт скорость близкую к нативной.
+
+**Решение:** на Mac обязателен нативный Ollama. На Linux/Windows с GPU — Docker работает нормально.
 
 ---
 
@@ -258,16 +280,36 @@ tsx@^4.22.4  vitest@^4.1.9  @types/node@^26.0.0  typescript@^5.5.3
 
 ---
 
-### 🔲 Итерация 5: Тесты
+### ✅ Итерация 5: Тесты (unit, чистые модули)
 
-**Цель:** Минимум 10 тестов, все зелёные.
+**Цель:** Покрыть тестами чистые модули без внешних зависимостей.
 
-**Статус:** НЕ НАЧАТА (зависит от Итерации 4)
+**Статус:** ЗАВЕРШЕНА (unit-тесты) / интеграционные и e2e — после Итерации 4
 
-**Тесты:**
-- `tests/unit/graph.test.ts` — 5+ тестов узлов графа с mock LLM
-- `tests/unit/indexer.test.ts` — 3+ тестов индексера (загрузка файлов, чанки)
-- `tests/e2e/mcp-tools.test.ts` — 2+ e2e тестов MCP инструментов
+**Что сделано:**
+
+Структура: тесты располагаются в `__tests__/` рядом с модулем (конвенция Jest/Vitest сообщества).
+
+- `src/indexer/__tests__/loaders.test.ts` — 11 тестов:
+  - Валидация: несуществующая папка, файл вместо папки
+  - Основные случаи: пустая папка, чтение поддерживаемых расширений, пропуск неподдерживаемых, метаданные, рекурсия
+  - Edge cases: файлы без расширения (`README`), скрытые файлы (`.gitignore`), нечитаемые файлы
+
+- `src/indexer/__tests__/chunker.test.ts` — 7 тестов:
+  - Основные случаи: непустой контент, пустой контент, метаданные, последовательные индексы, непустые чанки
+  - Edge cases: контент только из пробелов → пустой массив; очень длинное слово без пробелов → без краша
+
+- `src/__tests__/progress.test.ts` — 10 тестов:
+  - `measureBatch`: результат, передача аргументов, счётчик батчей, пробрасывание исключения, пустой массив без деления на ноль
+  - `onDone`: счётчик чанков, avg 0 tok/s без батчей
+  - `onError`: сообщение, не-Error значения, счётчик батчей, отсутствие счётчика без батчей
+
+**Итого:** 28 тестов, 3 файла, `npx vitest run` — всё зелёное.
+
+**Что осталось (после Итерации 4):**
+- `src/rag/__tests__/nodes.test.ts` — узлы графа с mock LLM
+- `tests/e2e/mcp-tools.test.ts` — e2e тесты MCP инструментов
+- Интеграционные тесты `vector.ts` / `indexer.ts` (требуют ChromaDB + Ollama)
 
 ---
 
