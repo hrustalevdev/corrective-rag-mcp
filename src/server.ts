@@ -20,7 +20,7 @@ Supports .md, .txt, .py, .js, .ts, .json, .yaml files.
 Use this tool whenever the user wants to add documents, update the knowledge base, or index a project directory.
 After indexing, documents become searchable via ask_question and find_relevant_docs.`,
       inputSchema: z.object({
-        folder_path: z.string().describe('Absolute or relative path to the folder to index'),
+        folder_path: z.string().nonempty().describe('Absolute or relative path to the folder to index'),
       }),
     },
     async ({ folder_path }, ctx) => {
