@@ -39,12 +39,12 @@ MCP client → src/index.ts (stdio transport)
 | `src/server.ts` | Registers all 4 MCP tools with descriptions + Zod input schemas |
 | `src/config.ts` | Parses all config from env vars via Zod; single `config` export |
 | `src/tools/` | Thin handlers — call domain modules, format MCP response |
-| `src/indexer/indexer.ts` | Coordinates load→chunk→embed→store; holds in-memory state and `indexedChunks[]` for BM25 |
+| `src/indexer/indexer.ts` | Coordinates load→chunk→embed→store; holds in-memory state |
 | `src/indexer/loaders.ts` | Recursive folder scan, reads supported file extensions |
 | `src/indexer/chunker.ts` | `RecursiveCharacterTextSplitter` with language-aware splitting |
 | `src/retriever/vector.ts` | ChromaDB client + OllamaEmbeddings; singleton instances, batched at 50 |
-| `src/retriever/bm25.ts` | BM25 search over in-memory `indexedChunks`; pure function, no external services |
-| `src/retriever/hybrid.ts` | `rrfFusion()` (pure, RRF_K=60) + `hybridSearch()` (BM25 + vector in parallel) |
+| `src/retriever/bm25.ts` | `BM25Index` class (MiniSearch, BM25+ k=1.5/b=0.75, Unicode tokenizer); singleton `bm25` |
+| `src/retriever/hybrid.ts` | `hybridSearch()` — BM25 + vector in parallel, merged via private `_rrfFusion()` (RRF_K=60) |
 | `src/progress/tracker.ts` | `ProgressTracker` — measures embedding batches, sends MCP progress notifications |
 
 ### What's not yet implemented
@@ -80,4 +80,4 @@ Required vars: `OLLAMA_BASE_URL`, `OLLAMA_MODEL`, `OLLAMA_EMBEDDING_MODEL`, `CHR
 
 ### Tests
 
-Tests live in `__tests__/` subdirectories next to their modules (Vitest convention). Currently 42 unit tests across 5 files: `loaders`, `chunker`, `ProgressTracker`, `bm25`, `rrfFusion` — all pure modules with no external dependencies. Integration and e2e tests are planned after Iteration 4.
+Tests live in `__tests__/` subdirectories next to their modules (Vitest convention). Currently 37 unit tests across 4 files: `loaders`, `chunker`, `ProgressTracker`, `bm25` — all pure modules with no external dependencies. Integration and e2e tests are planned after Iteration 4.

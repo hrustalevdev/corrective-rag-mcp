@@ -256,21 +256,23 @@ tsx@^4.22.4  vitest@^4.1.9  @types/node@^26.0.0  typescript@^5.5.3
 **Статус:** ЗАВЕРШЕНА
 
 **Что сделано:**
-- `src/retriever/bm25.ts` — BM25 реализован вручную (без `@langchain/community`): токенизация, IDF, TF, параметры k1=1.5/b=0.75. Работает с `indexedChunks` из `indexer.ts` in-memory.
-- `src/retriever/hybrid.ts` — `rrfFusion(bm25Results, vectorResults, topK)` — чистая функция, RRF_K=60. `hybridSearch(query, topK)` — запускает BM25 и vector параллельно через `Promise.all`, применяет RRF.
+- `src/retriever/bm25.ts` — `BM25Index` класс на основе MiniSearch (BM25+, Unicode-токенайзер `[\p{L}\p{N}]+`, параметры k=1.5/b=0.75/d=0.5). Методы: `update(chunks)`, `search(query, topK)`, `reset()`. Синглтон `bm25`. Заменил кастомную реализацию с поломанным токенайзером для кириллицы.
+- `src/retriever/hybrid.ts` — `hybridSearch(query, topK)` запускает BM25 и vector параллельно через `Promise.all`, сливает через приватный хелпер `_rrfFusion()` (RRF_K=60, `fetchK = topK * 2`).
 - `src/tools/find-relevant.ts` — реализован: вызывает `hybridSearch`, возвращает `{ chunks: [{content, source, score, rank}], total }`.
 - `vitest.config.ts` — добавлен, чтобы исключить `dist/` из тестов (баг был до этой итерации).
-- Новые тесты: `src/retriever/__tests__/bm25.test.ts` (7 тестов), `src/retriever/__tests__/hybrid.test.ts` (7 тестов).
+- Новые тесты: `src/retriever/__tests__/bm25.test.ts` (9 тестов, включая кириллицу).
 
 **Важные выводы (для следующего агента):**
-- `@langchain/community` для BM25 не потребовался — своя реализация проще и лучше тестируется.
-- `hybrid.test.ts` мокирует `vector.ts` и `indexer.ts` через `vi.mock(...)` (вверху файла, до импортов) — иначе `config.ts` падает при парсинге env.
+- `@langchain/community` для BM25 не потребовался — MiniSearch проще, лучше тестируется, поддерживает Unicode.
+- `_rrfFusion` — приватный хелпер в `hybrid.ts` (конвенция: `// HELPERS` + `_` префикс), не экспортируется и не тестируется отдельно.
 - `hybridSearch` использует `fetchK = topK * 2` для обоих источников перед слиянием — чтобы RRF мог учесть больше кандидатов.
 - `find_relevant_docs` требует запущенных ChromaDB и Ollama (через `hybridSearch` → `queryChunks`). BM25 часть работает без них.
 
-**Итого тестов:** 42 (28 предыдущих + 14 новых), `npx vitest run` — все зелёные.
+**Итого тестов:** 37 (28 предыдущих + 9 новых), `npx vitest run` — все зелёные.
 
-**Проверка:** `find_relevant_docs("dragon fire abilities", 5)` возвращает релевантные чанки.
+**Проверка:**
+- `find_relevant_docs("dragon fire abilities", 5)` — возвращает релевантные чанки на английском.
+- `find_relevant_docs("дракон", 5)` — возвращает релевантные чанки на русском; чанки с точным BM25-совпадением получают score ~0.033 (двойной RRF-буст), остальные — ~0.016 (только вектор).
 
 ---
 
