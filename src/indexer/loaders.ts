@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { extname, join, resolve } from 'node:path';
 
 export const SUPPORTED_EXTENSIONS = new Set([
@@ -22,6 +22,10 @@ export interface LoadedDoc {
 
 export function loadFilesFromFolder(folderPath: string): LoadedDoc[] {
   const absPath = resolve(folderPath);
+
+  if (!existsSync(absPath)) throw new Error(`Folder not found: ${absPath}`);
+  if (!statSync(absPath).isDirectory()) throw new Error(`Not a directory: ${absPath}`);
+
   const filePaths = _collectFilePaths(absPath);
   const docs: LoadedDoc[] = [];
 
