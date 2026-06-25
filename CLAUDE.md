@@ -29,7 +29,7 @@ MCP client → src/index.ts (stdio transport)
            → src/tools/*.ts (thin handlers)
                → src/indexer/ (for index_folder / index_status)
                → src/retriever/ (for find_relevant_docs)
-               → src/rag/ (for ask_question — NOT YET IMPLEMENTED)
+               → src/rag/ (for ask_question)
 ```
 
 ### Module responsibilities
@@ -45,14 +45,12 @@ MCP client → src/index.ts (stdio transport)
 | `src/retriever/vector.ts` | ChromaDB client + OllamaEmbeddings; singleton instances, batched at 50 |
 | `src/retriever/bm25.ts` | `BM25Index` class (MiniSearch, BM25+ k=1.5/b=0.75, Unicode tokenizer); singleton `bm25` |
 | `src/retriever/hybrid.ts` | `hybridSearch()` — BM25 + vector in parallel, merged via private `_rrfFusion()` (RRF_K=60) |
+| `src/rag/state.ts` | `Annotation.Root` — LangGraph state with 7 fields |
+| `src/rag/nodes.ts` | `createNodes(llm)` factory — 5 RAG nodes (rewriteQuery, retrieve, gradeChunks, generateAnswer, broadenQuery) |
+| `src/rag/graph.ts` | `StateGraph` assembly; `shouldContinue` router; `compiledGraph` singleton; `createGraph(llm?)` for tests |
 | `src/progress/tracker.ts` | `ProgressTracker` — measures embedding batches, sends MCP progress notifications |
 
-### What's not yet implemented
-
-- `src/rag/state.ts`, `src/rag/nodes.ts`, `src/rag/graph.ts` — LangGraph Corrective RAG graph (Iteration 4)
-- `src/tools/ask-question.ts` — stub, waiting for Iteration 4
-
-See `docs/plan.md` for the full iteration plan and architectural decisions.
+See `docs/plan.md` for the full iteration plan and `ARCHITECTURE.md` for detailed diagrams.
 
 ### External services required at runtime
 
@@ -78,6 +76,14 @@ Required vars: `OLLAMA_BASE_URL`, `OLLAMA_MODEL`, `OLLAMA_EMBEDDING_MODEL`, `CHR
 - **`ProgressTracker`** — create one instance per tool call in `server.ts`, pass it down the call chain. Per-call lifecycle means no reset needed.
 - **MCP SDK**: use `server.registerTool()` (v2 API). The older `server.tool()` is deprecated and triggers warnings in MCP Inspector.
 
+### RAG nodes design
+
+- **`createNodes(llm: ChatOllama)`** — factory, injects LLM; enables unit testing with fake LLM
+- **`gradeChunks`** — all LLM calls via `Promise.all` (parallel, latency = single call)
+- **`shouldContinue`** — exported (not a `_`-helper) so it can be unit-tested directly
+- **`compiledGraph`** — module-level singleton created at import time; `createGraph(llm?)` for tests
+- Prompts in **English** — qwen2.5:3b follows EN instructions more reliably; understands Russian content
+
 ### Tests
 
-Tests live in `__tests__/` subdirectories next to their modules (Vitest convention). Currently 37 unit tests across 4 files: `loaders`, `chunker`, `ProgressTracker`, `bm25` — all pure modules with no external dependencies. Integration and e2e tests are planned after Iteration 4.
+Tests live in `__tests__/` subdirectories next to their modules (Vitest convention). Currently 49 unit tests across 6 files: `loaders`, `chunker`, `ProgressTracker`, `bm25`, `rag/nodes`, `rag/graph` — all pure modules with no external dependencies. Integration and e2e tests are planned for Iteration 6.

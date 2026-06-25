@@ -302,11 +302,25 @@ const filtered = pieces.filter((p) => p.trim().length >= 50);
 
 ---
 
-### 🔲 Итерация 4: LangGraph Corrective RAG
+### ✅ Итерация 4: LangGraph Corrective RAG
 
 **Цель:** `ask_question` работает с полным графом.
 
-**Статус:** НЕ НАЧАТА (зависит от Итерации 3)
+**Статус:** ЗАВЕРШЕНА
+
+**Что сделано:**
+- `src/rag/state.ts` — `Annotation.Root` с полями: query, rewrittenQuery, chunks, relevantChunks, answer, retryCount, sources
+- `src/rag/nodes.ts` — `createNodes(llm: ChatOllama)` фабрика; узлы: rewriteQuery, retrieve, gradeChunks (Promise.all параллельно), generateAnswer (fallback на все chunks), broadenQuery
+- `src/rag/graph.ts` — `StateGraph` с условными переходами через `shouldContinue`; синглтон `compiledGraph`; `createGraph(llm?)` для тестов
+- `src/tools/ask-question.ts` — вызывает `compiledGraph.invoke({ query })`, возвращает `{ answer, sources, chunks_used, retries }`
+- Тесты: `src/rag/__tests__/nodes.test.ts` (7 тестов), `src/rag/__tests__/graph.test.ts` (4 теста) — итого +11, всего 48
+
+**Важные выводы (для следующего агента):**
+- Промпты на английском — qwen2.5:3b надёжнее следует EN инструкциям, понимает русский контент
+- `gradeChunks` использует `Promise.all` — параллельные вызовы LLM, latency как у одного вызова
+- `shouldContinue` экспортируется (не `_`-хелпер) — нужен для unit-тестов роутинга
+- `compiledGraph` — синглтон, создаётся при импорте `graph.ts`; `createGraph(llm?)` — для тестов с инжектированным LLM
+- `gradeChunks` парсит ответ через `.startsWith('yes')` — надёжно для small local LLM
 
 **Файлы для создания:**
 - `src/rag/state.ts` — `Annotation.Root` с полями query, rewrittenQuery, chunks, relevantChunks, answer, retryCount, sources
