@@ -43,14 +43,14 @@ MCP client → src/index.ts (stdio transport)
 | `src/indexer/loaders.ts` | Recursive folder scan, reads supported file extensions |
 | `src/indexer/chunker.ts` | `RecursiveCharacterTextSplitter` with language-aware splitting |
 | `src/retriever/vector.ts` | ChromaDB client + OllamaEmbeddings; singleton instances, batched at 50 |
-| `src/progress.ts` | `ProgressTracker` — measures embedding batches, sends MCP progress notifications |
+| `src/retriever/bm25.ts` | BM25 search over in-memory `indexedChunks`; pure function, no external services |
+| `src/retriever/hybrid.ts` | `rrfFusion()` (pure, RRF_K=60) + `hybridSearch()` (BM25 + vector in parallel) |
+| `src/progress/tracker.ts` | `ProgressTracker` — measures embedding batches, sends MCP progress notifications |
 
 ### What's not yet implemented
 
-- `src/retriever/bm25.ts` — BM25 retriever (Iteration 3)
-- `src/retriever/hybrid.ts` — RRF fusion (Iteration 3)
 - `src/rag/state.ts`, `src/rag/nodes.ts`, `src/rag/graph.ts` — LangGraph Corrective RAG graph (Iteration 4)
-- `src/tools/find-relevant.ts` and `src/tools/ask-question.ts` return stubs
+- `src/tools/ask-question.ts` — stub, waiting for Iteration 4
 
 See `docs/plan.md` for the full iteration plan and architectural decisions.
 
@@ -80,4 +80,4 @@ Required vars: `OLLAMA_BASE_URL`, `OLLAMA_MODEL`, `OLLAMA_EMBEDDING_MODEL`, `CHR
 
 ### Tests
 
-Tests live in `__tests__/` subdirectories next to their modules (Vitest convention). Currently 28 unit tests covering `loaders`, `chunker`, and `ProgressTracker` — all pure modules with no external dependencies. Integration and e2e tests are planned after Iteration 4.
+Tests live in `__tests__/` subdirectories next to their modules (Vitest convention). Currently 42 unit tests across 5 files: `loaders`, `chunker`, `ProgressTracker`, `bm25`, `rrfFusion` — all pure modules with no external dependencies. Integration and e2e tests are planned after Iteration 4.

@@ -58,12 +58,12 @@ npm run dev
 
 ## Инструменты MCP
 
-| Инструмент | Что делает |
-|-----------|-----------|
-| `index_folder(folder_path)` | Индексирует все файлы в папке (.md, .txt, .py, .js, .ts, .json, .yaml) |
-| `index_status()` | Возвращает статистику индекса: файлы, чанки, время последней индексации |
-| `find_relevant_docs(query, top_k)` | Гибридный поиск BM25 + вектор + RRF, без генерации ответа |
-| `ask_question(question)` | Полный Corrective RAG pipeline: rewrite → retrieve → grade → generate |
+| Инструмент | Что делает | Статус |
+|-----------|-----------|--------|
+| `index_folder(folder_path)` | Индексирует все файлы в папке (.md, .txt, .py, .js, .ts, .json, .yaml) | ✅ |
+| `index_status()` | Возвращает статистику индекса: файлы, чанки, время последней индексации | ✅ |
+| `find_relevant_docs(query, top_k)` | Гибридный поиск BM25 + вектор + RRF, без генерации ответа | ✅ |
+| `ask_question(question)` | Полный Corrective RAG pipeline: rewrite → retrieve → grade → generate | 🔲 в разработке |
 
 ## Демо-документы
 
