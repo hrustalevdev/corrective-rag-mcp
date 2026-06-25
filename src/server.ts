@@ -1,9 +1,9 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
+import { handleAskQuestion } from './tools/ask-question.js';
+import { handleFindRelevantDocs } from './tools/find-relevant.js';
 import { handleIndexFolder } from './tools/index-folder.js';
 import { handleIndexStatus } from './tools/index-status.js';
-import { handleFindRelevantDocs } from './tools/find-relevant.js';
-import { handleAskQuestion } from './tools/ask-question.js';
 
 export function createServer(): McpServer {
   const server = new McpServer({
@@ -20,10 +20,15 @@ Use this tool whenever the user wants to add documents, update the knowledge bas
 After indexing, documents become searchable via ask_question and find_relevant_docs.`,
       inputSchema: z.object({
         folder_path: z.string().describe('Absolute or relative path to the folder to index'),
-        glob_pattern: z.string().optional().describe('Glob pattern to filter files, e.g. "**/*.md". Defaults to all supported formats.'),
+        glob_pattern: z
+          .string()
+          .optional()
+          .describe(
+            'Glob pattern to filter files, e.g. "**/*.md". Defaults to all supported formats.',
+          ),
       }),
     },
-    async ({ folder_path, glob_pattern }) => handleIndexFolder(folder_path, glob_pattern)
+    async ({ folder_path, glob_pattern }) => handleIndexFolder(folder_path, glob_pattern),
   );
 
   server.registerTool(
@@ -33,7 +38,7 @@ After indexing, documents become searchable via ask_question and find_relevant_d
 Use this tool to check if documents have been indexed before answering questions, or to verify indexing completed successfully.`,
       inputSchema: z.object({}),
     },
-    async () => handleIndexStatus()
+    async () => handleIndexStatus(),
   );
 
   server.registerTool(
@@ -44,10 +49,16 @@ Returns ranked document chunks with scores and source file paths — WITHOUT gen
 Use this tool when the user wants to find relevant passages, explore the knowledge base, or when a raw search result is needed rather than a generated answer.`,
       inputSchema: z.object({
         query: z.string().describe('Search query to find relevant documents'),
-        top_k: z.number().int().min(1).max(20).default(5).describe('Number of top chunks to return'),
+        top_k: z
+          .number()
+          .int()
+          .min(1)
+          .max(20)
+          .default(5)
+          .describe('Number of top chunks to return'),
       }),
     },
-    async ({ query, top_k }) => handleFindRelevantDocs(query, top_k)
+    async ({ query, top_k }) => handleFindRelevantDocs(query, top_k),
   );
 
   server.registerTool(
@@ -61,7 +72,7 @@ Use this tool whenever the user asks a question that should be answered from the
         question: z.string().describe('The question to answer using the knowledge base'),
       }),
     },
-    async ({ question }) => handleAskQuestion(question)
+    async ({ question }) => handleAskQuestion(question),
   );
 
   return server;
