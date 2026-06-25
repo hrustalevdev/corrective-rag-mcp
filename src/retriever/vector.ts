@@ -2,7 +2,7 @@ import { OllamaEmbeddings } from '@langchain/ollama';
 import { ChromaClient, type Collection } from 'chromadb';
 import { config } from '../config.js';
 import type { Chunk } from '../indexer/chunker.js';
-import type { ProgressTracker } from '../progress.js';
+import type { ProgressTracker } from '../progress/tracker.js';
 
 const BATCH_SIZE = 50;
 
