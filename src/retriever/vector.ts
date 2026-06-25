@@ -2,6 +2,7 @@ import { OllamaEmbeddings } from '@langchain/ollama';
 import { ChromaClient, type Collection } from 'chromadb';
 import { config } from '../config.js';
 import type { Chunk } from '../indexer/chunker.js';
+import type { ProgressTracker } from '../progress.js';
 
 const BATCH_SIZE = 50;
 
@@ -21,14 +22,17 @@ export async function resetCollection(): Promise<void> {
   activeCollection = await client.createCollection({ name: config.chroma.collection });
 }
 
-export async function addChunks(chunks: Chunk[]): Promise<void> {
+export async function addChunks(chunks: Chunk[], tracker?: ProgressTracker): Promise<void> {
   const collection = await _getCollection();
   const emb = _getEmbedder();
+  const totalBatches = Math.ceil(chunks.length / BATCH_SIZE);
+  const embedFn = emb.embedDocuments.bind(emb);
+  const embed = tracker?.measureBatch(embedFn, { totalBatches }) ?? embedFn;
 
   for (let i = 0; i < chunks.length; i += BATCH_SIZE) {
     const batch = chunks.slice(i, i + BATCH_SIZE);
     const contents = batch.map((c) => c.content);
-    const vectors = await emb.embedDocuments(contents);
+    const vectors = await embed(contents);
     const ids = batch.map((c) => `${c.metadata.source}::${c.metadata.chunkIndex}`);
 
     await collection.add({

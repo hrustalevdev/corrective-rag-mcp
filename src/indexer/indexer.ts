@@ -1,3 +1,4 @@
+import type { ProgressTracker } from '../progress.js';
 import { addChunks, resetCollection } from '../retriever/vector.js';
 import { type Chunk, chunkDocument } from './chunker.js';
 import { loadFilesFromFolder } from './loaders.js';
@@ -24,7 +25,10 @@ const state: IndexerState = {
 // stored in memory for BM25 retrieval (Iteration 3)
 export let indexedChunks: Chunk[] = [];
 
-export async function indexFolder(folderPath: string): Promise<IndexerState> {
+export async function indexFolder(
+  folderPath: string,
+  tracker?: ProgressTracker,
+): Promise<IndexerState> {
   state.status = 'indexing';
   state.error = undefined;
 
@@ -38,7 +42,8 @@ export async function indexFolder(folderPath: string): Promise<IndexerState> {
     }
 
     await resetCollection();
-    await addChunks(allChunks);
+    await addChunks(allChunks, tracker);
+    tracker?.onDone(allChunks.length);
 
     indexedChunks = allChunks;
     state.indexedFiles = docs.length;
@@ -47,6 +52,7 @@ export async function indexFolder(folderPath: string): Promise<IndexerState> {
     state.folderPath = folderPath;
     state.status = 'ready';
   } catch (err) {
+    tracker?.onError(err);
     state.status = 'error';
     state.error = err instanceof Error ? err.message : String(err);
     state.indexedFiles = 0;

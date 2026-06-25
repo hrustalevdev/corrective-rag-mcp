@@ -1,5 +1,6 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
+import { ProgressTracker } from './progress.js';
 import { handleAskQuestion } from './tools/ask-question.js';
 import { handleFindRelevantDocs } from './tools/find-relevant.js';
 import { handleIndexFolder } from './tools/index-folder.js';
@@ -20,15 +21,12 @@ Use this tool whenever the user wants to add documents, update the knowledge bas
 After indexing, documents become searchable via ask_question and find_relevant_docs.`,
       inputSchema: z.object({
         folder_path: z.string().describe('Absolute or relative path to the folder to index'),
-        glob_pattern: z
-          .string()
-          .optional()
-          .describe(
-            'Glob pattern to filter files, e.g. "**/*.md". Defaults to all supported formats.',
-          ),
       }),
     },
-    async ({ folder_path, glob_pattern }) => handleIndexFolder(folder_path, glob_pattern),
+    async ({ folder_path }, ctx) => {
+      const tracker = new ProgressTracker(ctx);
+      return handleIndexFolder(folder_path, tracker);
+    },
   );
 
   server.registerTool(

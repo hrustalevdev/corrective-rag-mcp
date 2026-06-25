@@ -200,18 +200,20 @@ tsx@^4.22.4  vitest@^4.1.9  @types/node@^26.0.0  typescript@^5.5.3
 
 **Статус:** НЕ НАЧАТА
 
-**Что сделать:**
-- Добавить `onProgress` callback в `addChunks(chunks, onProgress?)` и пробросить через `indexFolder`
-- В callback выводить через `console.error` на каждый батч:
-  ```
-  [indexer] batch 2/10 | 50 chunks | 1 234ms | ~6 500 tok/s
-  ```
-- По завершении — итоговая строка:
-  ```
-  [indexer] done: 500 chunks, 12.3s total, avg ~7 200 tok/s
-  ```
-- Токены/сек считать как `(символы в батче / 4) / (время в сек)` — коэффициент /4 для английского, для русского реальное значение будет выше
-- Подключить MCP progress notifications (`reportProgress`) в tool handler `index_folder` — агент будет видеть прогресс
+**Что сделано (код):**
+- `src/progress.ts` — класс `ProgressTracker` (инстанс создаётся на каждый вызов инструмента в `server.ts`)
+  - `onBatch(p)` — логирует батч в stderr + MCP progress notification
+  - `onDone(totalChunks)` — итоговая строка с avg tok/s
+  - `BatchProgress`, `BatchProgressCallback` — типы для `addChunks`
+- `src/retriever/vector.ts` — `addChunks(chunks, onProgress?)` измеряет `elapsedMs` и `tokensPerSec` per batch, вызывает callback
+- `src/indexer/indexer.ts` — принимает `tracker?: ProgressTracker`, передаёт в `addChunks`
+- `src/tools/index-folder.ts` — прокидывает `tracker`
+- `src/server.ts` — `new ProgressTracker(ctx)` → `handleIndexFolder`
+- Вывод per batch: `[indexer] batch 2/10 | 50 chunks | 1234ms | ~6500 tok/s`
+- Итоговая строка: `[indexer] done: 500 chunks, 12.3s total, avg ~7200 tok/s`
+- MCP progress notification: `progress/total` + message (только если клиент передал `progressToken`)
+
+**Что ещё сделать (живое тестирование):**
 
 **Проверка (вживую):**
 1. Запустить ChromaDB и Ollama (Docker или нативно)

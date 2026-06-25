@@ -1,10 +1,11 @@
 import { indexFolder } from '../indexer/indexer.js';
+import type { ProgressTracker } from '../progress.js';
 
 export async function handleIndexFolder(
   folderPath: string,
-  _globPattern?: string,
+  tracker?: ProgressTracker,
 ): Promise<{ content: Array<{ type: 'text'; text: string }> }> {
-  const result = await indexFolder(folderPath);
+  const result = await indexFolder(folderPath, tracker);
 
   const text =
     result.status === 'ready'
