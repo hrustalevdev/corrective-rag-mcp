@@ -1,14 +1,23 @@
-export async function handleIndexStatus(): Promise<{ content: Array<{ type: 'text'; text: string }> }> {
-  // TODO: implement in iteration 2
+import { getStatus } from '../indexer/indexer.js';
+
+export async function handleIndexStatus(): Promise<{
+  content: Array<{ type: 'text'; text: string }>;
+}> {
+  const s = getStatus();
+
   return {
-    content: [{
-      type: 'text',
-      text: JSON.stringify({
-        indexed_files: 0,
-        indexed_chunks: 0,
-        last_indexed_at: null,
-        status: 'empty',
-      }),
-    }],
+    content: [
+      {
+        type: 'text',
+        text: JSON.stringify({
+          status: s.status,
+          indexed_files: s.indexedFiles,
+          indexed_chunks: s.indexedChunks,
+          last_indexed_at: s.lastIndexedAt,
+          folder: s.folderPath,
+          ...(s.error ? { error: s.error } : {}),
+        }),
+      },
+    ],
   };
 }

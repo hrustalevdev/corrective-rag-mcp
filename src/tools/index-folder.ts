@@ -1,17 +1,25 @@
+import { indexFolder } from '../indexer/indexer.js';
+
 export async function handleIndexFolder(
   folderPath: string,
-  globPattern?: string
+  _globPattern?: string,
 ): Promise<{ content: Array<{ type: 'text'; text: string }> }> {
-  // TODO: implement in iteration 2
-  return {
-    content: [{
-      type: 'text',
-      text: JSON.stringify({
-        status: 'not_implemented',
-        folder: folderPath,
-        glob_pattern: globPattern ?? '**/*',
-        message: 'Indexing not yet implemented',
-      }),
-    }],
-  };
+  const result = await indexFolder(folderPath);
+
+  const text =
+    result.status === 'ready'
+      ? JSON.stringify({
+          status: 'success',
+          folder: result.folderPath,
+          indexed_files: result.indexedFiles,
+          indexed_chunks: result.indexedChunks,
+          last_indexed_at: result.lastIndexedAt,
+        })
+      : JSON.stringify({
+          status: 'error',
+          folder: folderPath,
+          error: result.error ?? 'Unknown error',
+        });
+
+  return { content: [{ type: 'text', text }] };
 }
