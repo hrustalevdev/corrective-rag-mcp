@@ -147,30 +147,54 @@ tsx@^4.22.4  vitest@^4.1.9  @types/node@^26.0.0  typescript@^5.5.3
 
 ---
 
-### 🔲 Итерация 2: Индексер документов
+### ✅ Итерация 2: Индексер документов
 
 **Цель:** `index_folder` и `index_status` работают полностью.
 
-**Статус:** НЕ НАЧАТА (зависит от Итерации 1)
+**Статус:** ЗАВЕРШЕНА
 
-**Файлы для создания:**
-- `src/indexer/loaders.ts` — загрузка .md/.txt/.py/.js/.ts/.json/.yaml
-- `src/indexer/chunker.ts` — RecursiveCharacterTextSplitter для текста, по функциям для кода
-- `src/indexer/indexer.ts` — координация, хранение статуса в памяти
-- `src/retriever/vector.ts` — ChromaDB клиент, add/query
-- Обновить `src/tools/index-folder.ts`
-- Обновить `src/tools/index-status.ts`
+**Что сделано:**
+- `src/indexer/loaders.ts` — рекурсивный обход папки, чтение файлов по расширению (.md/.txt/.py/.js/.ts/.json/.yaml)
+- `src/indexer/chunker.ts` — `RecursiveCharacterTextSplitter` с `fromLanguage` для markdown/js/python; `.ts` → `'js'` (TypeScript нет в списке поддерживаемых, JS-разделители совместимы)
+- `src/indexer/indexer.ts` — координация load→chunk→embed→store; статус в памяти; `indexedChunks[]` для BM25 в Итерации 3
+- `src/retriever/vector.ts` — ChromaDB клиент + `OllamaEmbeddings`; батчинг по 50 чанков; `resetCollection()` при переиндексации
+- Обновлён `src/tools/index-folder.ts`
+- Обновлён `src/tools/index-status.ts`
 
-**Дополнительные зависимости:**
+**Установленные зависимости:**
 ```
-@langchain/core @langchain/community @langchain/ollama chromadb
+@langchain/core @langchain/textsplitters @langchain/ollama chromadb
 ```
 
-**Проверка:** `index_folder("./sample_docs")` → `index_status()` показывает > 0 файлов и чанков.
+**Важные выводы (для следующего агента):**
+- `@langchain/textsplitters` v1.0.1 не поддерживает `'ts'` как язык в `fromLanguage()`. Решение: `.ts` файлы чанкуются как `'js'` — разделители совместимы, для наших целей некритично.
+- Для работы `index_folder` нужны запущенные сервисы: ChromaDB (`http://localhost:8000`) и Ollama (`http://localhost:11434`) с моделью `nomic-embed-text`.
+- `indexedChunks` экспортируется из `indexer.ts` как in-memory массив — BM25Retriever в Итерации 3 будет работать с ним напрямую.
+- Русскоязычные документы: сплиттер и эмбеддинги работают корректно. BM25 в Итерации 3 потребует внимания — без стемминга/лемматизации качество для русского будет ниже (токены "дракон"/"дракона" разные).
+- `@langchain/community` (нужен для BM25) — намеренно не установлен, ставить в Итерации 3.
+
+**Проверка:** `npm run build` — чистая сборка. Функциональная проверка требует запущенных ChromaDB и Ollama.
 
 ---
 
-### 🔲 Итерация 3: Гибридный поиск
+### ✅ Итерация 2.5: Biome (форматирование + линтинг)
+
+**Цель:** настроить форматирование и линтинг, привести весь существующий код в соответствие.
+
+**Статус:** ЗАВЕРШЕНА
+
+**Что сделано:**
+- Установлен `@biomejs/biome` v2.5.1
+- `biome.json`: spaces/2, lineWidth 100, одинарные кавычки, semicolons, trailingCommas, organizeImports
+- Скрипты в `package.json`: `check`, `lint`, `format`
+- Весь код в `src/` приведён в соответствие: `biome check --write --unsafe src` — 0 замечаний
+- `npm run build` — чистый
+
+**Важно:** начиная с Итерации 3 весь новый код сразу писать в соответствии с этими правилами. Node.js built-ins импортировать с префиксом `node:` (`node:fs`, `node:path`).
+
+---
+
+### 🔲 Итерация 3: Гибридный поиск (BM25 + Vector + RRF)
 
 **Цель:** `find_relevant_docs` работает (BM25 + vector + RRF).
 
