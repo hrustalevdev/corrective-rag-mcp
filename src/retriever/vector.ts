@@ -19,7 +19,7 @@ export async function resetCollection(): Promise<void> {
     // collection may not exist yet
   }
 
-  activeCollection = await client.createCollection({ name: config.chroma.collection });
+  activeCollection = await client.createCollection({ name: config.chroma.collection, embeddingFunction: null });
 }
 
 export async function addChunks(chunks: Chunk[], tracker?: ProgressTracker): Promise<void> {
@@ -74,7 +74,13 @@ export async function queryChunks(query: string, topK: number): Promise<VectorRe
 
 function _getClient(): ChromaClient {
   if (!chromaClient) {
-    chromaClient = new ChromaClient({ path: config.chroma.url });
+    const { hostname, port, protocol } = new URL(config.chroma.url);
+
+    chromaClient = new ChromaClient({
+      host: hostname,
+      port: Number(port || (protocol === 'https:' ? 443 : 80)),
+      ssl: protocol === 'https:',
+    });
   }
 
   return chromaClient;
@@ -93,7 +99,7 @@ function _getEmbedder(): OllamaEmbeddings {
 
 async function _getCollection(): Promise<Collection> {
   if (!activeCollection) {
-    activeCollection = await _getClient().getOrCreateCollection({ name: config.chroma.collection });
+    activeCollection = await _getClient().getOrCreateCollection({ name: config.chroma.collection, embeddingFunction: null });
   }
 
   return activeCollection;
