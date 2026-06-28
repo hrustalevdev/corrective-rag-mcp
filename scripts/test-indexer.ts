@@ -1,6 +1,6 @@
 import { config } from '../src/config.js';
 import { indexFolder } from '../src/indexer/indexer.js';
-import { ProgressTracker } from '../src/progress.js';
+import { ProgressTracker } from '../src/progress/tracker.js';
 
 const folderPath = process.argv[2] ?? 'sample_docs';
 
