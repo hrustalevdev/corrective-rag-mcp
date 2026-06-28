@@ -16,7 +16,7 @@ MCP-сервер на Node.js/TypeScript, который превращает л
 | Граф / оркестрация | `@langchain/langgraph` |
 | LLM (Ollama) | `@langchain/ollama` |
 | Векторное хранилище | `chromadb` клиент → ChromaDB сервис в Docker |
-| BM25 | `@langchain/community` BM25Retriever |
+| BM25 | `MiniSearch` (BM25+, Unicode-токенайзер) |
 | Тесты | `vitest` |
 | Docker | Dockerfile + docker-compose.yml (server + chromadb + ollama) |
 
@@ -36,7 +36,8 @@ corrective-rag-mcp/
 │   ├── indexer/
 │   │   ├── indexer.ts        ← координирует индексацию, хранит статус
 │   │   ├── loaders.ts        ← загрузка файлов по расширению
-│   │   └── chunker.ts        ← разбивка на чанки (текст/код)
+│   │   ├── chunker.ts        ← разбивка на чанки (текст/код)
+│   │   └── summarizer.ts     ← LLM-генерация domain_summary по сэмплу чанков
 │   ├── retriever/
 │   │   ├── hybrid.ts         ← гибридный поиск + RRF fusion
 │   │   ├── bm25.ts           ← BM25 ретривер
@@ -44,13 +45,8 @@ corrective-rag-mcp/
 │   └── rag/
 │       ├── state.ts          ← LangGraph state (Annotation.Root)
 │       ├── nodes.ts          ← узлы графа
-│       └── graph.ts          ← сборка графа, экспорт compiledGraph
-├── tests/
-│   ├── unit/
-│   │   ├── graph.test.ts
-│   │   └── indexer.test.ts
-│   └── e2e/
-│       └── mcp-tools.test.ts
+│       ├── graph.ts          ← сборка графа, экспорт createGraph()
+│       └── prompts.ts        ← промпты (мультиязычные: EN-запрос → ответ на языке пользователя)
 ├── sample_docs/              ← демо-документы (фэнтезийная игра)
 │   ├── docs/     ← .md файлы
 │   ├── notes/    ← .txt файлы
@@ -90,8 +86,11 @@ User Query
 
 ```
 OLLAMA_BASE_URL=http://localhost:11434  (или http://ollama:11434 в Docker)
-OLLAMA_MODEL=qwen2.5:3b
-OLLAMA_EMBEDDING_MODEL=nomic-embed-text
+OLLAMA_MODEL=llama3.1:8b               (рекомендуется ≥7B; 3B-модели не справляются с grading)
+OLLAMA_EMBEDDING_MODEL=bge-m3           (мультиязычная; nomic-embed-text не поддерживает кириллицу)
+OLLAMA_TEMPERATURE=0                    (детерминированные ответы)
+OLLAMA_NUM_CTX=8192                     (критично для RAG: дефолт 2048 не вмещает 5 чанков + промпт)
+OLLAMA_NUM_PREDICT=1024                 (максимальная длина ответа)
 CHROMA_URL=http://localhost:8000        (или http://chromadb:8000 в Docker)
 CHROMA_COLLECTION=rag_documents
 MIN_RELEVANT_CHUNKS=2
@@ -316,11 +315,11 @@ const filtered = pieces.filter((p) => p.trim().length >= 50);
 - Тесты: `src/rag/__tests__/nodes.test.ts` (7 тестов), `src/rag/__tests__/graph.test.ts` (4 теста) — итого +11, всего 48
 
 **Важные выводы (для следующего агента):**
-- Промпты на английском — qwen2.5:3b надёжнее следует EN инструкциям, понимает русский контент
+- Промпты на английском — llama3.1:8b надёжно следует EN инструкциям; 3B-модели (qwen2.5:3b, phi3) не справлялись с gradeChunks даже после доработки промптов
 - `gradeChunks` использует `Promise.all` — параллельные вызовы LLM, latency как у одного вызова
 - `shouldContinue` экспортируется (не `_`-хелпер) — нужен для unit-тестов роутинга
-- `compiledGraph` — синглтон, создаётся при импорте `graph.ts`; `createGraph(llm?)` — для тестов с инжектированным LLM
-- `gradeChunks` парсит ответ через `.startsWith('yes')` — надёжно для small local LLM
+- `createGraph(llm?, tracker?)` — синглтон убран, граф создаётся per-call (нужен для передачи tracker в узлы)
+- `gradeChunks` парсит ответ через `.startsWith('yes')` — надёжно для local LLM
 
 **Файлы для создания:**
 - `src/rag/state.ts` — `Annotation.Root` с полями query, rewrittenQuery, chunks, relevantChunks, answer, retryCount, sources
@@ -365,19 +364,40 @@ const filtered = pieces.filter((p) => p.trim().length >= 50);
 
 ---
 
+### ✅ Итерация 5.5: Улучшения после базовой реализации
+
+**Статус:** ЗАВЕРШЕНА
+
+**Что сделано:**
+
+- **ChromaDB 1.0.0** — два breaking changes в `src/retriever/vector.ts`: `path` → `host`/`port`/`ssl`; `embeddingFunction: null`. Подробнее — [`docs/notes/chromadb-1.0.0.md`](notes/chromadb-1.0.0.md)
+- **bge-m3** — смена embedding-модели с `nomic-embed-text` (768d) на `bge-m3` (1024d, 100+ языков). При смене модели переиндексировать обязательно. Подробнее — [`docs/notes/model-selection.md`](notes/model-selection.md)
+- **llama3.1:8b** — `qwen2.5:3b` и `phi3` не справлялись с `gradeChunks` даже после доработки промптов; переход на удалённый ПК RTX 3070 Ti. Подробнее — [`docs/notes/model-selection.md`](notes/model-selection.md)
+- **Параметры Ollama в env** — `OLLAMA_TEMPERATURE=0`, `OLLAMA_NUM_CTX=8192`, `OLLAMA_NUM_PREDICT=1024`
+- **Мультиязычные промпты** — `src/rag/prompts.ts`: запрос → EN для поиска, ответ на языке пользователя. Подробнее — [`docs/notes/multilingual-rag.md`](notes/multilingual-rag.md)
+- **domain_summary** — `src/indexer/summarizer.ts`: LLM-фраза о тематике базы из 15 случайных чанков; поле в `index_status`. Подробнее — [`docs/notes/multilingual-rag.md`](notes/multilingual-rag.md)
+- **Прогресс для ask_question** — `ProgressTracker.wrapLlmCall` + `notifyRagStep`; `createGraph(llm?, tracker?)` per-call (синглтон убран)
+- **Tool descriptions** — явные императивы (`Call this FIRST`, `ALWAYS use`, `you MUST`). Подробнее — [`docs/notes/multilingual-rag.md`](notes/multilingual-rag.md)
+
+**Итого тестов:** 60 (7 файлов), включая новый `src/indexer/__tests__/summarizer.test.ts`
+
+---
+
 ### 🔲 Итерация 6: Docker + CI + Документация
 
 **Цель:** `docker compose up` запускает всё одной командой.
 
-**Статус:** НЕ НАЧАТА (зависит от Итерации 5)
+**Статус:** НЕ НАЧАТА
 
 **Файлы для создания:**
 - `Dockerfile`
 - `docker-compose.yml` — services: app, chromadb, ollama
-- `.env.example`
-- `mcp-config-example.json`
 - `.github/workflows/ci.yml` — lint + тесты
-- `README.md`, `ARCHITECTURE.md`, `REPORT.md`
+
+**Уже существуют (обновить при необходимости):**
+- `README.md`, `ARCHITECTURE.md` — основная документация
+- `.env.example` — уже актуален
+- `REPORT.md` — сгенерировать из `docs/PLAN.md` + `docs/notes/` как финальный артефакт
 
 ---
 

@@ -47,10 +47,10 @@ MCP client → src/index.ts (stdio transport)
 | `src/retriever/hybrid.ts` | `hybridSearch()` — BM25 + vector in parallel, merged via private `_rrfFusion()` (RRF_K=60) |
 | `src/rag/state.ts` | `Annotation.Root` — LangGraph state with 7 fields |
 | `src/rag/nodes.ts` | `createNodes(llm)` factory — 5 RAG nodes (rewriteQuery, retrieve, gradeChunks, generateAnswer, broadenQuery) |
-| `src/rag/graph.ts` | `StateGraph` assembly; `shouldContinue` router; `compiledGraph` singleton; `createGraph(llm?)` for tests |
+| `src/rag/graph.ts` | `StateGraph` assembly; `shouldContinue` router; `createGraph(llm?, tracker?)` per-call |
 | `src/progress/tracker.ts` | `ProgressTracker` — measures embedding batches, sends MCP progress notifications |
 
-See `docs/plan.md` for the full iteration plan and `ARCHITECTURE.md` for detailed diagrams.
+See `docs/PLAN.md` for the full iteration plan and `ARCHITECTURE.md` for detailed diagrams. Detailed observations and decision rationale live in `docs/notes/`.
 
 ### External services required at runtime
 
@@ -81,9 +81,9 @@ Required vars: `OLLAMA_BASE_URL`, `OLLAMA_MODEL`, `OLLAMA_EMBEDDING_MODEL`, `CHR
 - **`createNodes(llm: ChatOllama)`** — factory, injects LLM; enables unit testing with fake LLM
 - **`gradeChunks`** — all LLM calls via `Promise.all` (parallel, latency = single call)
 - **`shouldContinue`** — exported (not a `_`-helper) so it can be unit-tested directly
-- **`compiledGraph`** — module-level singleton created at import time; `createGraph(llm?)` for tests
-- Prompts in **English** — qwen2.5:3b follows EN instructions more reliably; understands Russian content
+- **`createGraph(llm?, tracker?)`** — creates graph per call (no singleton); tracker is injected for MCP progress notifications
+- Prompts in **English** — llama3.1:8b follows EN instructions reliably; understands Russian content and responds in the user's query language
 
 ### Tests
 
-Tests live in `__tests__/` subdirectories next to their modules (Vitest convention). Currently 49 unit tests across 6 files: `loaders`, `chunker`, `ProgressTracker`, `bm25`, `rag/nodes`, `rag/graph` — all pure modules with no external dependencies. Integration and e2e tests are planned for Iteration 6.
+Tests live in `__tests__/` subdirectories next to their modules (Vitest convention). Currently 60 unit tests across 7 files: `loaders`, `chunker`, `ProgressTracker`, `bm25`, `rag/nodes`, `rag/graph`, `summarizer` — all pure modules with no external dependencies. Integration and e2e tests are planned for Iteration 6.

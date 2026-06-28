@@ -45,8 +45,8 @@ cp .env.example .env
 docker run -p 8000:8000 chromadb/chroma
 
 # 4. Скачать модели Ollama
-ollama pull qwen2.5:3b
-ollama pull nomic-embed-text
+ollama pull llama3.1:8b
+ollama pull bge-m3
 
 # 5. Запустить сервер в MCP Inspector
 npm run dev
@@ -66,8 +66,11 @@ npm run dev
       "args": ["/path/to/corrective-rag-mcp/dist/index.js"],
       "env": {
         "OLLAMA_BASE_URL": "http://localhost:11434",
-        "OLLAMA_MODEL": "qwen2.5:3b",
-        "OLLAMA_EMBEDDING_MODEL": "nomic-embed-text",
+        "OLLAMA_MODEL": "llama3.1:8b",
+        "OLLAMA_EMBEDDING_MODEL": "bge-m3",
+        "OLLAMA_TEMPERATURE": "0",
+        "OLLAMA_NUM_CTX": "8192",
+        "OLLAMA_NUM_PREDICT": "1024",
         "CHROMA_URL": "http://localhost:8000",
         "CHROMA_COLLECTION": "rag_documents",
         "MIN_RELEVANT_CHUNKS": "2",
@@ -156,8 +159,11 @@ npm run dev
 | Переменная | По умолчанию | Описание |
 |-----------|-------------|---------|
 | `OLLAMA_BASE_URL` | `http://localhost:11434` | URL Ollama |
-| `OLLAMA_MODEL` | `qwen2.5:3b` | Модель для LLM-вызовов |
-| `OLLAMA_EMBEDDING_MODEL` | `nomic-embed-text` | Модель для эмбеддингов |
+| `OLLAMA_MODEL` | `llama3.1:8b` | Модель для LLM-вызовов (рекомендуется ≥7B) |
+| `OLLAMA_EMBEDDING_MODEL` | `bge-m3` | Модель для эмбеддингов (мультиязычная) |
+| `OLLAMA_TEMPERATURE` | `0` | Температура LLM (0 = детерминированные ответы) |
+| `OLLAMA_NUM_CTX` | `8192` | Контекстное окно LLM (критично для RAG) |
+| `OLLAMA_NUM_PREDICT` | `1024` | Максимальная длина ответа в токенах |
 | `CHROMA_URL` | `http://localhost:8000` | URL ChromaDB |
 | `CHROMA_COLLECTION` | `rag_documents` | Название коллекции |
 | `MIN_RELEVANT_CHUNKS` | `2` | Минимум релевантных чанков для генерации |
@@ -167,7 +173,7 @@ npm run dev
 
 ```bash
 npm run test        # тесты (vitest watch)
-npx vitest run      # тесты одним прогоном (49 тестов)
+npx vitest run      # тесты одним прогоном (60 тестов)
 npm run check       # biome lint + format
 npm run build       # компиляция TypeScript
 npm run dev         # MCP Inspector

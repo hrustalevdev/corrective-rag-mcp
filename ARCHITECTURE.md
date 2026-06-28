@@ -17,7 +17,7 @@ flowchart TD
     IF --> Indexer["src/indexer/indexer.ts"]
     IS --> Indexer
     FR --> Hybrid["src/retriever/hybrid.ts"]
-    AQ --> Graph["src/rag/graph.ts\ncompiledGraph"]
+    AQ --> Graph["src/rag/graph.ts\ncreateGraph()"]
 
     Indexer --> Loaders["src/indexer/loaders.ts"]
     Indexer --> Chunker["src/indexer/chunker.ts"]
@@ -44,13 +44,15 @@ flowchart TD
 | `src/indexer/indexer.ts` | Coordinates load→chunk→embed→store; holds in-memory state |
 | `src/indexer/loaders.ts` | Recursive folder scan, reads supported file extensions |
 | `src/indexer/chunker.ts` | `RecursiveCharacterTextSplitter` with language-aware splitting |
+| `src/indexer/summarizer.ts` | Generates one-sentence `domain_summary` from 15 random chunk samples via LLM |
 | `src/retriever/vector.ts` | ChromaDB client + OllamaEmbeddings; singleton, batched at 50 |
 | `src/retriever/bm25.ts` | `BM25Index` (MiniSearch, BM25+ k=1.5/b=0.75, Unicode tokenizer) |
 | `src/retriever/hybrid.ts` | `hybridSearch()` — BM25 + vector in parallel, merged via RRF (k=60) |
 | `src/rag/state.ts` | `Annotation.Root` — LangGraph state definition |
-| `src/rag/nodes.ts` | `createNodes(llm)` factory — 5 RAG nodes |
-| `src/rag/graph.ts` | `StateGraph` assembly, `shouldContinue` router, `compiledGraph` singleton |
-| `src/progress/tracker.ts` | `ProgressTracker` — measures embedding batches, MCP progress notifications |
+| `src/rag/nodes.ts` | `createNodes(llm, tracker?)` factory — 5 RAG nodes with progress notifications |
+| `src/rag/graph.ts` | `StateGraph` assembly, `shouldContinue` router; `createGraph(llm?, tracker?)` per-call |
+| `src/rag/prompts.ts` | Prompt templates — EN retrieval queries, responds in user's language |
+| `src/progress/tracker.ts` | `ProgressTracker` — embedding batches + RAG step MCP progress notifications |
 
 ## Corrective RAG Graph
 
@@ -83,7 +85,7 @@ flowchart LR
 ```mermaid
 flowchart LR
     Q[query] --> BM25["BM25Index\nMiniSearch, Unicode-токенайзер\nBM25+ k=1.5 / b=0.75"]
-    Q --> VEC["ChromaDB\nOllamaEmbeddings\nnomic-embed-text"]
+    Q --> VEC["ChromaDB\nOllamaEmbeddings\nbge-m3"]
     BM25 -->|"top fetchK"| RRF["RRF Fusion\n1/(k+rank), k=60"]
     VEC -->|"top fetchK"| RRF
     RRF -->|"top K"| OUT[ranked chunks]
@@ -159,4 +161,4 @@ classDiagram
 - **Приватные хелперы** под `// HELPERS` с `_` префиксом.
 - **Biome:** 2 пробела, одинарные кавычки, точка с запятой, trailing commas, lineWidth 100.
 - **`ProgressTracker`** — новый инстанс на каждый tool call в `server.ts`.
-- **`compiledGraph`** — синглтон, создаётся при импорте `graph.ts`; `createGraph(llm?)` — для тестов.
+- **`createGraph(llm?, tracker?)`** — создаётся per-call (нет синглтона); `tracker` инжектируется для MCP progress notifications.
